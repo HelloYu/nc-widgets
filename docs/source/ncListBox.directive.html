@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">(function(angular) {
+    &#39;use strict&#39;;
+
+    angular
+        .module(&#39;nc-widgets&#39;)
+        .directive(&#39;ncRadioBox&#39;, ncRadioBox);
+<span id='ncRadioBox'>    /**
+</span>     * 
+     * @class ncRadioBox
+     *    
+     * 
+     * ### Usage
+     * 
+     *     &lt;nc-radio-box  nc-options=&quot;vm.options&quot;&gt;&lt;/nc-radio-box&gt;
+     * 
+     * ```javascript
+     * function Controller($scope) {
+     *     var vm = this;
+     *     vm.options = {
+	 *         selected: &#39;&#39;,
+	 *         data: [
+     *             {id: &#39;1&#39;, name: &#39;Tim&#39;}
+     *             {id: &#39;2&#39;, name: &#39;Jim&#39;}
+     *             {id: &#39;3&#39;, name: &#39;Dim&#39;}
+     *         ]
+     *     }
+     *     $scope.$watch(&#39;vm.options.selected&#39;,function(newValue, oldValue) {
+     *         if ( newValue != oldValue ) {
+     *             // 进行数据更新操作等
+     *         }
+     *     })
+     * }
+     * ```
+     * 
+     */
+    function ncRadioBox() {
+
+
+        return {
+            restrict: &#39;E&#39;,
+            replace: true,
+            template: &#39;form&gt;&lt;table style=&quot;border:1px solid;&quot; cellspacing=&quot;0&quot;&gt; &#39; +
+                &#39;&lt;tr ng-repeat=&quot;item in ncOptions.data &quot; ng-style={&quot;background-color&quot;:$odd?&quot;#f9f9f9&quot;:none} &gt;&#39; +
+                &#39;&lt;td&gt;&lt;input type=&quot;radio&quot; ng-model=&quot;ncOptions.selected&quot; value=&quot;{{item.id}}&quot;&gt;&lt;/td&gt;&#39; +
+                &#39;&lt;td style=&quot;border-left:1px solid&quot;&gt;{{item.name}}&lt;/td&gt;&#39; +
+                &#39;&lt;/tr&gt;&lt;/table&gt;&lt;/form&gt;&#39;,
+            scope: {
+
+               
+<span id='ncRadioBox-cfg-nc-options'>                /**
+</span>                 * 
+                 * @cfg {Object} nc-options
+                 * 配置选项，包括数据
+                 * ### 数据格式
+                 * ```javascript
+                 * var options = {
+    			 *   
+                 *   selected: &#39;&#39;,
+                 *   data:[
+                 *      {id:&#39;1&#39;,name:&#39;Tim&#39;},
+                 *      {id:&#39;2&#39;,name:&#39;Jim&#39;},
+                 *      {id:&#39;3&#39;,name:&#39;Rom&#39;},
+                 *   ]
+                 * }
+                 * ```
+                 * `selected`会被设置成选中的id，也可能是对象，看具体情况
+                 */
+                ncOptions: &#39;=&#39;
+            },
+
+
+
+        }
+    }
+
+
+})(window.angular);
+</pre>
+</body>
+</html>

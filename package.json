@@ -1,0 +1,21 @@
+{
+  "name": "nc-widgets",
+  "version": "1.0.0",
+  "description": "福建新开普前端组件包",
+  "main": "README.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "newcapec",
+    "front-end",
+    "widgets"
+  ],
+  "author": "Jeffre Yu",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-uglify": "^1.5.3"
+  }
+}
