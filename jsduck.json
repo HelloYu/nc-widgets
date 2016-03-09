@@ -1,6 +1,6 @@
 {
     "--title": "福建新开普前端组件API文档",
     "--warnings": ["-link", "-nodoc"],
-    "--": ["ncListBox/"],
+    "--": ["ncTreeTable/"],
     "--output": "docs"
 }

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">(function(angular, $) {
+    &#39;use strict&#39;;
+
+    angular
+        .module(&#39;nc-widgets&#39;)
+        .directive(&#39;ncTreeTable&#39;, ncTreeTable);
+
+    ncTreeTable.$inject = [&#39;$compile&#39;];
+
+<span id='ncTreeTable'>    /**
+</span>     * 
+     * @class ncTreeTable
+     *    
+     * ## 使用说明
+     * ```javascript
+     * // 在html中使用标签
+     * &lt;nc-tree-table nc-options=&quot;options&quot; nc-data=&quot;data&quot;&gt;&lt;/nc-tree-table&gt;
+     *
+     * // 其中option格式如下：
+     * var options = {
+     *      withInput: {
+     *          type: &#39;checkbox&#39;,
+     *          width: &#39;20px&#39;
+     *      }
+     *      // 其它参数，请查看Config options
+     * }
+     * 
+     *
+     * // 数据格式如下：
+     * var data = [
+     *  {id:&#39;1&#39;,name:&#39;A&#39;,parentId:&#39;&#39;},
+     *  {id:&#39;2&#39;,name:&#39;A-1&#39;,parentId:&#39;1&#39;},
+     *  {id:&#39;3&#39;,name:&#39;A-1-1&#39;,parentId:&#39;2&#39;},
+     *  {id:&#39;4&#39;,name:&#39;B&#39;,parentId:&#39;&#39;},
+     * ] 
+     * 
+     * ```
+     * 
+     * 设置完参数和数据之后，可以在controller中设置watch，如果用户选中某行，执行相应操作
+     * 
+     * ```javascript
+     * function TreetableCtrl($scope) {
+     *   var vm = this;
+     *   var vm.options = optionObject;
+     *   $scope.$watch(&#39;vm.options.selected&#39;,function(newVal,oldVal){
+     *      if (newVal != oldVal) {
+     *          // 新老数据不一样，说明用户进行了操作
+     *          // 执行某些操作，可以是根据用户选中的id去获取新的数据等。
+     *      }   
+     *    });
+     * }
+     * ```    
+     *     
+     * 
+     */
+    function ncTreeTable($compile) {
+
+        function Node(row, tree, settings) {
+            this.id = row.attr(settings.nodeIdAttr);
+            this.row = row;
+            this.tree = tree;
+            this.children = [];
+            this.initialized = false;
+            this.settings = settings;
+            this.parentId = this._getParentId(row, settings.parentIdAttr);
+
+            this.treeCell = $(this.row.children(this.settings.columnElType)[this.settings.column]);
+            this.expander = $(this.settings.expanderTemplate);
+            this.reducer = $(this.settings.reducerTemplate);
+            this.toggleBtn = $(&#39;&lt;span&gt;&lt;/span&gt;&#39;);
+            this.indenter = $(this.settings.indenterTemplate);
+            this.treeCell.prepend(this.indenter);
+        };
+
+        Node.prototype.toggle = function() {
+
+            if (this.expanded()) {
+                this.collapse();
+                // 变换按钮
+                this.toggleBtn.html(this.expander);
+            } else {
+                this.expand();
+                this.toggleBtn.html(this.reducer);
+            }
+            return this;
+        };
+
+        Node.prototype.show = function() {
+
+            if (!this.initialized) {
+                this._initialize();
+            }
+
+            this.row.show();
+
+            if (this.expanded()) {
+                this._showChildren();
+            }
+            return this;
+        };
+
+        Node.prototype.hide = function() {
+            this._hideChildren();
+            this.row.hide();
+            return this;
+        };
+        Node.prototype._hideChildren = function() {
+            var child, _i, _len, _ref, _results;
+            _ref = this.children;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i &lt; _len; _i++) {
+                child = _ref[_i];
+                _results.push(child.hide());
+            }
+            return _results;
+        };
+
+        Node.prototype._showChildren = function() {
+            var child, _i, _len, _ref, _results;
+            _ref = this.children;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i &lt; _len; _i++) {
+                child = _ref[_i];
+                _results.push(child.show());
+            }
+            return _results;
+        };
+        Node.prototype.collapsed = function() {
+            return this.row.hasClass(&quot;collapsed&quot;);
+        };
+
+        Node.prototype.parentNode = function() {
+            if (this.parentId != null) {
+                return this.tree[this.parentId];
+            } else {
+                return null;
+            }
+        };
+        Node.prototype._initialize = function() {
+            var settings = this.settings;
+
+            this.render();
+
+            if (settings.expandable === true &amp;&amp; settings.initialState === &quot;collapsed&quot;) {
+                this.collapse();
+            } else {
+                this.expand();
+            }
+
+            return this.initialized = true;
+        };
+
+        Node.prototype._getParentId = function(node, parentIdAttr) {
+            var parentId = node.attr(parentIdAttr);
+            if (parentId != null &amp;&amp; parentId !== &quot;&quot;) {
+                return parentId;
+            }
+        };
+
+        Node.prototype.render = function() {
+            var handler,
+                settings = this.settings,
+                target;
+
+
+            if (settings.expandable === true &amp;&amp; this.isBranchNode()) {
+                handler = function(e) {
+
+                    e.data.tree[$(this).parents(&quot;tr&quot;).attr(settings.nodeIdAttr)].toggle();
+                    return e.preventDefault();
+                };
+
+                // 分支结点默认expander
+                this.toggleBtn.html(this.expander);
+                this.indenter.html(this.toggleBtn);
+                target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
+
+                (function(tree) {
+                    target.off(&quot;click&quot;).on(&quot;click&quot;, { tree: tree }, handler);
+                })(this.tree)
+
+            }
+            this.indenter[0].style.paddingLeft = &quot;&quot; + (this.level() * settings.indent) + &quot;px&quot;;
+
+            return this;
+        };
+
+        Node.prototype.isBranchNode = function() {
+            if (this.children.length &gt; 0 || this.row.data(this.settings.branchAttr) === true) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+        Node.prototype.updateBranchLeafClass = function() {
+            this.row.removeClass(&#39;branch&#39;);
+            this.row.removeClass(&#39;leaf&#39;);
+            this.row.addClass(this.isBranchNode() ? &#39;branch&#39; : &#39;leaf&#39;);
+        };
+        Node.prototype.ancestors = function() {
+            var ancestors, node;
+            node = this;
+            ancestors = [];
+            while (node = node.parentNode()) {
+                ancestors.push(node);
+            }
+            return ancestors;
+        };
+
+        // 返回结点层数,层节点padding使用
+        Node.prototype.level = function() {
+            return this.ancestors().length;
+        };
+
+        Node.prototype.addChild = function(child) {
+            return this.children.push(child);
+        };
+        Node.prototype.expanded = function() {
+            return this.row.hasClass(&quot;expanded&quot;);
+        };
+        // 折叠所有孩子结点
+        Node.prototype.collapse = function() {
+            if (this.collapsed()) {
+                return this;
+            }
+
+            this.row.removeClass(&quot;expanded&quot;).addClass(&quot;collapsed&quot;);
+
+            this._hideChildren();
+            this.expander.attr(&quot;title&quot;, this.settings.stringExpand);
+
+            return this;
+        };
+        Node.prototype.expand = function() {
+            if (this.expanded()) {
+                return this;
+            }
+
+            this.row.removeClass(&quot;collapsed&quot;).addClass(&quot;expanded&quot;);
+
+
+            if ($(this.row).is(&quot;:visible&quot;)) {
+                this._showChildren();
+            }
+
+            this.expander.attr(&quot;title&quot;, this.settings.stringCollapse);
+
+            return this;
+        };
+
+        function Tree(settings) {
+            this.tree = {};
+            this.settings = settings;
+
+            // 缓存节点
+            this.nodes = [];
+            this.roots = [];
+        };
+
+        // 载入每一条数据
+        Tree.prototype.loadRows = function(rows) {
+            var node, row, i;
+
+            if (rows != null) {
+                for (i = 0; i &lt; rows.length; i++) {
+
+                    row = this._toJQueryDOM(rows[i]);
+
+                    node = new Node(row, this.tree, this.settings);
+
+                    this.nodes.push(node);
+                    this.tree[node.id] = node;
+
+                    if (node.parentId != null &amp;&amp; this.tree[node.parentId]) {
+                        this.tree[node.parentId].addChild(node);
+                    } else {
+                        this.roots.push(node);
+                    }
+
+                }
+            }
+
+            // 所有数据组合完毕，更新信息
+            for (i = 0; i &lt; this.nodes.length; i++) {
+                node = this.nodes[i].updateBranchLeafClass();
+            }
+            return this;
+        };
+
+        Tree.prototype._toJQueryDOM = function(row) {
+            var tr = $(&#39;&lt;tr&gt;&lt;/tr&gt;&#39;),
+                i,
+                len = this.settings.columNames.length,
+                td,
+                col,
+                settings = this.settings,
+                withInput = this.settings.withInput;
+
+            tr.attr(settings.nodeIdAttr, row.id);
+            tr.attr(settings.parentIdAttr, row.parentId);
+
+
+            if (withInput &amp;&amp; !$.isEmptyObject(withInput)) {
+
+                var select = $(&#39;&lt;input type=&quot;&#39; + withInput.type + &#39;&quot;/&gt;&#39;);
+                if (withInput.type == &#39;radio&#39;) {
+                    select.attr(&#39;name&#39;, &#39;radio&#39;);
+                }
+
+                // 如果是radio多次点击不会重复添加
+
+                (function(row, settings) {
+                    select.on(&#39;click&#39;, {
+                        id: row.id,
+                        settings: settings
+                    }, function(e) {
+                        var type = withInput.type,
+                            id = e.data.id,
+                            index = e.data.settings.selected.indexOf(id);
+
+                        if (type == &#39;radio&#39;) {
+                            e.data.settings.selected = [];
+                        }
+
+                        // 防止radio重复添加，checkbox要进行删除。
+
+                        if (index != -1 &amp;&amp; type != &#39;radio&#39;) {
+                            e.data.settings.selected.splice(index, 1);
+                        } else {
+                            e.data.settings.selected.push(id);
+                        }
+                    })
+                })(row, settings);
+
+                td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;);
+                td.append(select);
+                td.width(withInput.width);
+                tr.append(td);
+            }
+
+            // 遍历数据根据columNames，动态生成td
+            for (i = 0; i &lt; len; i++) {
+                col = settings.columNames[i];
+                if (row[col]) {
+                    td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;);
+                    td.html(row[col]);
+                    tr.append(td);
+                };
+            }
+
+            return tr;
+        };
+
+        Tree.prototype._toAngularDOM = function(settings) {
+            var tr = $(&#39;&lt;tr&gt;&lt;/tr&gt;&#39;),
+                td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;),
+                len = settings.columNames.length,
+                col,
+                i;
+
+            // 如果设置了checkbox或者是radio
+            if (settings.withInput &amp;&amp; !$.isEmptyObject(settings.withInput)) {
+                var input = $(&#39;&lt;input&gt;&#39;);
+                var type = settings.withInput.type;
+                input.attr(&#39;type&#39;, type);
+                td.width(settings.withInput.width);
+
+                if (type == &#39;radio&#39;) {
+                    input.attr(&#39;name&#39;, &#39;radio&#39;);
+                }
+
+                input.attr(&#39;ng-click&#39;, &#39;setSelect(item.id)&#39;);
+                td.append(input);
+                tr.append(td);
+            }
+
+            tr.attr(&#39;ng-repeat&#39;, &#39;item in ncData&#39;);
+            tr.attr(settings.nodeIdAttr, &#39;{{item.id}}&#39;);
+            tr.attr(settings.parentIdAttr, &#39;{{item.parentId}}&#39;);
+
+            // 遍历数据根据columNames，动态生成td
+            for (i = 0; i &lt; len; i++) {
+                col = settings.columNames[i];
+
+                td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;);
+                td.attr(&#39;ng-bind&#39;, &#39;item.&#39; + col);
+                tr.append(td);
+            }
+            return tr;
+        };
+        // 渲染每一个层节点
+        Tree.prototype.render = function() {
+            var root, _i, _len, _ref;
+            _ref = this.roots;
+            for (_i = 0, _len = _ref.length; _i &lt; _len; _i++) {
+                root = _ref[_i];
+
+                // Node.show()
+                root.show();
+            }
+            return this;
+        };
+<span id='ncTreeTable-method-_initTable'>        /**
+</span>         * @private
+         * @method _initTable
+         * 初始化一个table元素，如果已经有这个元素移除所有结点返回   
+         * 
+         * @param {Object} element
+         * 指令所touch的元素
+         */
+        function _initTable(element) {
+            var table = element.children(&#39;table&#39;);
+            // 如果已经有table直接返回
+            if (!!table.length) {
+                table.children().remove();
+                return table;
+            }
+
+            var table = $(&#39;&lt;table&gt;&lt;/table&gt;&#39;);
+            table.addClass(&#39;table table-striped&#39;);
+            table.width(&#39;100%&#39;);
+            return table;
+        }
+
+<span id='ncTreeTable-method-_renderTable'>        /**
+</span>         * @private
+         * @method _renderTable
+         * 根据tree.roots中的关系，正确渲染table，
+         * 
+         * @param {Object} table
+         *
+         * @param {Object} tree
+         * 
+         */
+        function _renderTable(table,tree) {
+            var key;
+            for (key in tree) {
+                table.append(tree[key].row);
+                if (tree[key].children.length &gt; 0) {
+                    _renderTable(table, tree[key].children);
+                }
+            }
+        }
+
+        function link(scope, element, attrs) {
+
+           
+            scope.ncOptions = $.extend({
+                branchAttr: &quot;ttBranch&quot;,
+                clickableNodeNames: false,
+                column: 1, // 扩展按钮所在列
+<span id='ncTreeTable-cfg-columNames'>               /**
+</span>                * 
+                * @cfg 
+                * 需要显示的列的key   
+                *
+                */
+                columNames: [&#39;name&#39;], // 要显示的列名，不是th
+<span id='ncTreeTable-cfg-withInput'>               /** @cfg 
+</span>                * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
+                * 
+                * ```
+                * {
+                *       type: &#39;radio&#39;,
+                *       width: &#39;10%&#39; // 第一行宽度
+                * }
+                * ```
+                */
+                withInput: {
+                    type: &#39;radio&#39;,
+                    width: &#39;10%&#39;
+                },
+                columnElType: &quot;td&quot;,
+                expandable: true,
+<span id='ncTreeTable-cfg-expanderTemplate'>               /** @cfg 
+</span>                * 此属性是当数据折叠时显示的图标，默认是+号，如下：
+                *
+                * ```javascript
+                * &lt;i&gt;+&lt;/i&gt;
+                * ```
+                */
+                expanderTemplate: &quot;&lt;i&gt;+&lt;/i&gt;&quot;,
+<span id='ncTreeTable-cfg-reducerTemplate'>               /** @cfg 
+</span>                * 此属性是当数据展开后显示的图标，默认是-号，如下：
+                *
+                * ```javascript
+                * &lt;i&gt;-&lt;/i&gt;
+                * ```
+                */
+                reducerTemplate: &quot;&lt;i&gt;-&lt;/i&gt;&quot;,
+<span id='ncTreeTable-cfg-indent'>               /**
+</span>                * 
+                * @cfg 
+                * 每一层的缩进距离单位px
+                *    
+                *
+                */
+                indent: 19,
+                indenterTemplate: &quot;&lt;span class=&#39;indenter&#39;&gt;&lt;/span&gt;&quot;,
+                initialState: &quot;collapsed&quot;,
+                nodeIdAttr: &quot;nc-treetable-id&quot;, // maps to nc-treetable-id
+                parentIdAttr: &quot;nc-treetable-parent-id&quot;, // maps to nc-treetable-parent-id
+                stringExpand: &quot;Expand&quot;,
+                stringCollapse: &quot;Collapse&quot;,
+<span id='ncTreeTable-cfg-selected'>               /**
+</span>                * 
+                * @cfg 
+                * 当设置了withInput参数的时候，selected是一个id数组
+                * 
+                */
+                selected: []  // TODO: 是否直接判定点击执行函数好点？
+            }, scope.ncOptions);
+
+            // 防止重复渲染
+            scope.rendering = false;
+
+            var tree = new Tree(scope.ncOptions);
+            // 数据导入初始化
+            tree.loadRows(scope.ncData).render();
+
+            var table = _initTable(element);
+            // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
+            _renderTable(table, tree.roots);
+
+            // 监控数据是否发生变化，如果有改变重新渲染，如果使用repeat会更快。
+            // TODO: 销毁操作
+            scope.$watch(&#39;ncData&#39;, function(newVal, oldVal) {
+                if (newVal != oldVal &amp;&amp; !scope.rendering) {
+                    scope.rendering = true;
+
+                    var tree = new Tree(scope.ncOptions);
+
+                    table.children().remove();
+                    tree.loadRows(scope.ncData).render();
+                    _renderTable(table, tree.roots);
+                    scope.rendering = false;
+
+                }
+            })
+
+            // angular方法暂时无法渲染结点，还没找到原因
+            // var tr = tree._toAngularDOM(scope.ncOptions);
+            // table.append(tr);
+            // table = $compile(table)(scope);
+            // tree.loadRows(table.rows).render();
+
+            // 通知angular数据发生变化
+            table.on(&#39;click&#39;, function(e) {
+                scope.$apply();
+                e.stopPropagation();
+            })
+
+
+            element.append(table);
+        };
+
+
+
+        function controller($scope) {
+            $scope.setSelect = setSelect;
+
+            function setSelect(id) {
+                var type = $scope.ncOptions.withInput.type,
+                    index = $scope.ncOptions.selected.indexOf(id);
+
+                if (type == &#39;radio&#39;) {
+                    $scope.ncOptions.selected = [];
+                }
+
+                // 防止radio重复添加，checkbox要进行删除。
+
+                if (index != -1 &amp;&amp; type != &#39;radio&#39;) {
+                    $scope.ncOptions.selected.splice(index, 1);
+                } else {
+                    $scope.ncOptions.selected.push(id);
+                }
+            }
+        }
+
+        return {
+            restrict: &#39;EA&#39;,
+            controller: controller,
+            scope: {
+<span id='ncTreeTable-property-ncOptions'>                /**
+</span>                 * 
+                 * @property {Object} 
+                 * 配置参数查看config   
+                 * 
+                 */
+                ncOptions: &#39;=&#39;,
+<span id='ncTreeTable-property-ncData'>                /**
+</span>                 * 
+                 * @property {Array} 
+                 * 数据对象数组，对象格式如下：
+                 *
+                 * ```javascript
+                 * var data = [
+                 *  {id:&#39;1&#39;,name:&#39;A&#39;,parentId:&#39;&#39;},
+                 *  {id:&#39;2&#39;,name:&#39;A-1&#39;,parentId:&#39;1&#39;},
+                 *  {id:&#39;3&#39;,name:&#39;A-1-1&#39;,parentId:&#39;2&#39;},
+                 *  {id:&#39;4&#39;,name:&#39;B&#39;,parentId:&#39;&#39;},
+                 * ] 
+                 * ```
+                 */
+                ncData: &#39;=&#39;,
+            },
+            link: link
+        }
+    }
+})(window.angular, jQuery);
+</pre>
+</body>
+</html>
