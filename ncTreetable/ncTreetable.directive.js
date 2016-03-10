@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('nc-widgets')
+        .module('nc-treetable',[])
         .directive('ncTreeTable', ncTreeTable);
 
     ncTreeTable.$inject = ['$compile'];
@@ -14,7 +14,7 @@
      * ## 使用说明
      * ```javascript
      * // 在html中使用标签
-     * <nc-tree-table nc-options="options" nc-data="data"></nc-tree-table>
+     * <nc-tree-table nc-options="vm.options" nc-data="vm.data"></nc-tree-table>
      *
      * // 其中option格式如下：
      * var options = {
