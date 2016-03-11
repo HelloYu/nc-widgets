@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('nc-treetable',[])
+        .module('nc-widgets')
         .directive('ncTreeTable', ncTreeTable);
 
     ncTreeTable.$inject = ['$compile'];

@@ -3,7 +3,8 @@ var gulp = require('gulp');
 var uglify = require('gulp-uglify');
 
 var source = [
-	'ncListBox/*js'
+    'module.js',
+	'ncTreetable/*js'
 ]
 gulp.task('default', ['build']);
 
