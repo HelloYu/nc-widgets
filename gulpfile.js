@@ -11,6 +11,6 @@ gulp.task('default', ['build']);
 gulp.task('build',function(){
 	gulp.src(source)
 	.pipe(uglify())
-	.pipe(concat('nc-widgets.js'))
+	.pipe(concat('nc-widgets.min.js'))
 	.pipe(gulp.dest('build'))
 })
