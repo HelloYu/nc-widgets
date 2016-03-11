@@ -13,4 +13,8 @@ gulp.task('build',function(){
 	.pipe(uglify())
 	.pipe(concat('nc-widgets.min.js'))
 	.pipe(gulp.dest('build'))
+
+    gulp.src(source)
+    .pipe(concat('nc-widgets.js'))
+    .pipe(gulp.dest('build'))
 })
