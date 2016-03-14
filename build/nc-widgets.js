@@ -20,7 +20,8 @@
      * var options = {
      *      withInput: {
      *          type: 'checkbox',
-     *          width: '20px'
+     *          width: '20px',
+     *          name: 'radio' // 如果type是radio，name值必须唯一
      *      }
      *      // 其它参数，请查看Config options
      * }
@@ -304,7 +305,7 @@
 
                 var select = $('<input type="' + withInput.type + '"/>');
                 if (withInput.type == 'radio') {
-                    select.attr('name', 'radio');
+                    select.attr('name', withInput.name);
                 }
 
                 // 如果是radio多次点击不会重复添加
@@ -463,12 +464,14 @@
                 * {
                 *       type: 'radio',
                 *       width: '10%' // 第一行宽度
+                *       name: 'radio' // 可以是初始化这个模块的名称，保证值唯一，修复issue#3问题
                 * }
                 * ```
                 */
                 withInput: {
                     type: 'radio',
-                    width: '10%'
+                    width: '10%',
+                    name: 'radio' 
                 },
                 columnElType: "td",
                 expandable: true,
@@ -491,7 +494,7 @@
                /**
                 * 
                 * @cfg 
-                * 每一层的缩进距离单位px
+                * 每一层的缩进距离，单位px
                 *    
                 *
                 */
