@@ -420,6 +420,7 @@
             var table = $('<table></table>');
             table.addClass('table table-striped');
             table.width('100%');
+            table.height('100%');
             return table;
         }
 
