@@ -19,7 +19,7 @@
     &#39;use strict&#39;;
 
     angular
-        .module(&#39;nc-widgets&#39;)
+        .module(&#39;nc-treetable&#39;,[])
         .directive(&#39;ncTreeTable&#39;, ncTreeTable);
 
     ncTreeTable.$inject = [&#39;$compile&#39;];
@@ -37,7 +37,8 @@
      * var options = {
      *      withInput: {
      *          type: &#39;checkbox&#39;,
-     *          width: &#39;20px&#39;
+     *          width: &#39;20px&#39;,
+     *          name: &#39;radio&#39; // 如果type是radio，name值必须唯一
      *      }
      *      // 其它参数，请查看Config options
      * }
@@ -321,7 +322,7 @@
 
                 var select = $(&#39;&lt;input type=&quot;&#39; + withInput.type + &#39;&quot;/&gt;&#39;);
                 if (withInput.type == &#39;radio&#39;) {
-                    select.attr(&#39;name&#39;, &#39;radio&#39;);
+                    select.attr(&#39;name&#39;, withInput.name);
                 }
 
                 // 如果是radio多次点击不会重复添加
@@ -480,12 +481,14 @@
                 * {
                 *       type: &#39;radio&#39;,
                 *       width: &#39;10%&#39; // 第一行宽度
+                *       name: &#39;radio&#39; // 可以是初始化这个模块的名称，保证值唯一，修复issue#3问题
                 * }
                 * ```
                 */
                 withInput: {
                     type: &#39;radio&#39;,
-                    width: &#39;10%&#39;
+                    width: &#39;10%&#39;,
+                    name: &#39;radio&#39; 
                 },
                 columnElType: &quot;td&quot;,
                 expandable: true,
@@ -508,7 +511,7 @@
 <span id='ncTreeTable-cfg-indent'>               /**
 </span>                * 
                 * @cfg 
-                * 每一层的缩进距离单位px
+                * 每一层的缩进距离，单位px
                 *    
                 *
                 */
