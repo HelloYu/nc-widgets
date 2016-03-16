@@ -320,7 +320,7 @@
                             index = e.data.settings.selected.indexOf(id);
 
                         if (type == 'radio') {
-                            e.data.settings.selected.length = 0;
+                            e.data.settings.selected = [];
                         }
 
                         // 防止radio重复添加，checkbox要进行删除。
@@ -449,7 +449,7 @@
            
             scope.ncOptions = $.extend({
                 branchAttr: "ttBranch",
-                /**
+               /**
                 * 
                 * @cfg 
                 * 点击行展开  
