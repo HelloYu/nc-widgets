@@ -337,7 +337,7 @@
                             index = e.data.settings.selected.indexOf(id);
 
                         if (type == &#39;radio&#39;) {
-                            e.data.settings.selected = [];
+                            e.data.settings.selected.length = 0;
                         }
 
                         // 防止radio重复添加，checkbox要进行删除。
@@ -437,6 +437,7 @@
             var table = $(&#39;&lt;table&gt;&lt;/table&gt;&#39;);
             table.addClass(&#39;table table-striped&#39;);
             table.width(&#39;100%&#39;);
+           
             return table;
         }
 
@@ -465,7 +466,13 @@
            
             scope.ncOptions = $.extend({
                 branchAttr: &quot;ttBranch&quot;,
-                clickableNodeNames: false,
+<span id='ncTreeTable-cfg-clickableNodeNames'>                /**
+</span>                * 
+                * @cfg 
+                * 点击行展开  
+                *
+                */
+                clickableNodeNames: true,
                 column: 1, // 扩展按钮所在列
 <span id='ncTreeTable-cfg-columNames'>               /**
 </span>                * 
