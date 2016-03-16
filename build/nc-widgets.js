@@ -10,7 +10,7 @@
     /**
      * 
      * @class ncTreeTable
-     *    
+     * 
      * ## 使用说明
      * ```javascript
      * // 在html中使用标签
@@ -54,6 +54,7 @@
      *     
      * 
      */
+    /* @ngInject */
     function ncTreeTable($compile) {
 
         function Node(row, tree, settings) {
@@ -565,7 +566,7 @@
         };
 
 
-
+        /* @ngInject */
         function controller($scope) {
             $scope.setSelect = setSelect;
 
