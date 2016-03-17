@@ -1,0 +1,5 @@
+<div ng-controller="TreeTableCtrl as treetable">
+    <button ng-click="treetable.change()">改变数据</button>
+    <button ng-click="treetable.changeChecked()">改变选中</button>
+    <section nc-tree-table nc-options="treetable.options" nc-data="treetable.data"></section>
+</div>

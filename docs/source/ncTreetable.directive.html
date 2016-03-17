@@ -19,7 +19,7 @@
     &#39;use strict&#39;;
 
     angular
-        .module(&#39;nc-treetable&#39;,[])
+        .module(&#39;nc-treetable&#39;, [])
         .directive(&#39;ncTreeTable&#39;, ncTreeTable);
 
     ncTreeTable.$inject = [&#39;$compile&#39;];
@@ -27,7 +27,7 @@
 <span id='ncTreeTable'>    /**
 </span>     * 
      * @class ncTreeTable
-     *    
+     * 
      * ## 使用说明
      * ```javascript
      * // 在html中使用标签
@@ -71,6 +71,7 @@
      *     
      * 
      */
+    /* @ngInject */
     function ncTreeTable($compile) {
 
         function Node(row, tree, settings) {
@@ -88,7 +89,7 @@
             this.toggleBtn = $(&#39;&lt;span&gt;&lt;/span&gt;&#39;);
             this.indenter = $(this.settings.indenterTemplate);
             this.treeCell.prepend(this.indenter);
-        };
+        }
 
         Node.prototype.toggle = function() {
 
@@ -148,7 +149,7 @@
         };
 
         Node.prototype.parentNode = function() {
-            if (this.parentId != null) {
+            if (this.parentId !== null) {
                 return this.tree[this.parentId];
             } else {
                 return null;
@@ -170,7 +171,7 @@
 
         Node.prototype._getParentId = function(node, parentIdAttr) {
             var parentId = node.attr(parentIdAttr);
-            if (parentId != null &amp;&amp; parentId !== &quot;&quot;) {
+            if (parentId !== null &amp;&amp; parentId !== &quot;&quot;) {
                 return parentId;
             }
         };
@@ -195,7 +196,7 @@
 
                 (function(tree) {
                     target.off(&quot;click&quot;).on(&quot;click&quot;, { tree: tree }, handler);
-                })(this.tree)
+                })(this.tree);
 
             }
             this.indenter[0].style.paddingLeft = &quot;&quot; + (this.level() * settings.indent) + &quot;px&quot;;
@@ -266,6 +267,12 @@
             return this;
         };
 
+        Node.prototype.setChecked = function() {
+
+            this.row.find(&#39;input:first&#39;).prop(&#39;checked&#39;, true);
+            return this;
+        };
+
         function Tree(settings) {
             this.tree = {};
             this.settings = settings;
@@ -273,13 +280,13 @@
             // 缓存节点
             this.nodes = [];
             this.roots = [];
-        };
+        }
 
         // 载入每一条数据
         Tree.prototype.loadRows = function(rows) {
             var node, row, i;
 
-            if (rows != null) {
+            if (rows !== null) {
                 for (i = 0; i &lt; rows.length; i++) {
 
                     row = this._toJQueryDOM(rows[i]);
@@ -289,7 +296,7 @@
                     this.nodes.push(node);
                     this.tree[node.id] = node;
 
-                    if (node.parentId != null &amp;&amp; this.tree[node.parentId]) {
+                    if (node.parentId !== null &amp;&amp; this.tree[node.parentId]) {
                         this.tree[node.parentId].addChild(node);
                     } else {
                         this.roots.push(node);
@@ -337,7 +344,7 @@
                             index = e.data.settings.selected.indexOf(id);
 
                         if (type == &#39;radio&#39;) {
-                            e.data.settings.selected.length = 0;
+                            e.data.settings.selected = [];
                         }
 
                         // 防止radio重复添加，checkbox要进行删除。
@@ -347,7 +354,8 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
-                    })
+                    });
+
                 })(row, settings);
 
                 td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;);
@@ -363,7 +371,7 @@
                     td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;);
                     td.html(row[col]);
                     tr.append(td);
-                };
+                }
             }
 
             return tr;
@@ -434,10 +442,10 @@
                 return table;
             }
 
-            var table = $(&#39;&lt;table&gt;&lt;/table&gt;&#39;);
+            table = $(&#39;&lt;table&gt;&lt;/table&gt;&#39;);
             table.addClass(&#39;table table-striped&#39;);
             table.width(&#39;100%&#39;);
-           
+
             return table;
         }
 
@@ -451,7 +459,7 @@
          * @param {Object} tree
          * 
          */
-        function _renderTable(table,tree) {
+        function _renderTable(table, tree) {
             var key;
             for (key in tree) {
                 table.append(tree[key].row);
@@ -460,68 +468,97 @@
                 }
             }
         }
+<span id='ncTreeTable-method-_setChecked'>         /**
+</span>         * @private
+         * @method _setChecked
+         * 根据checked数组，设置相应input为选中
+         * 
+         * @param {Object} tree
+         *
+         * @param {Object} options
+         * 
+         */
+        function _setChecked(tree,options) {
+            var nodes = tree.tree,
+                len = options.checked.length,
+                checked = options.checked,
+                i;
+            if (options.withInput.type == &#39;radio&#39;) {
+               nodes[checked[0]].setChecked();
+               return
+            }    
+            for (i = 0; i &lt; len; i++) {
+                nodes[checked[i]].setChecked();
+            }
+        }
 
-        function link(scope, element, attrs) {
+        function link(scope, element) {
 
-           
+
             scope.ncOptions = $.extend({
                 branchAttr: &quot;ttBranch&quot;,
 <span id='ncTreeTable-cfg-clickableNodeNames'>                /**
-</span>                * 
-                * @cfg 
-                * 点击行展开  
-                *
-                */
+</span>                 * 
+                 * @cfg 
+                 * 点击行展开  
+                 *
+                 */
                 clickableNodeNames: true,
-                column: 1, // 扩展按钮所在列
-<span id='ncTreeTable-cfg-columNames'>               /**
-</span>                * 
-                * @cfg 
-                * 需要显示的列的key   
-                *
-                */
+<span id='ncTreeTable-cfg-column'>                /**
+</span>                 * 
+                 * @cfg 
+                 * 扩展按钮所在列，如果没有withInput参数，此项应该置0 
+                 *
+                 */
+                column: 1,
+<span id='ncTreeTable-cfg-columNames'>                /**
+</span>                 * 
+                 * @cfg 
+                 * 需要显示的列的key   
+                 *
+                 */
                 columNames: [&#39;name&#39;], // 要显示的列名，不是th
-<span id='ncTreeTable-cfg-withInput'>               /** @cfg 
-</span>                * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
-                * 
-                * ```
-                * {
-                *       type: &#39;radio&#39;,
-                *       width: &#39;10%&#39; // 第一行宽度
-                *       name: &#39;radio&#39; // 可以是初始化这个模块的名称，保证值唯一，修复issue#3问题
-                * }
-                * ```
-                */
+<span id='ncTreeTable-cfg-withInput'>                /** @cfg 
+</span>                 * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
+                 * 
+                 * ```
+                 * {
+                 *       type: &#39;radio&#39;,
+                 *       width: &#39;10%&#39; // 第一行宽度
+                 *       name: &#39;radio&#39; // 可以是初始化这个模块的名称，保证值唯一，修复issue#3问题
+                 * }
+                 * ```
+                 */
                 withInput: {
                     type: &#39;radio&#39;,
-                    width: &#39;10%&#39;,
-                    name: &#39;radio&#39; 
+                    width: &#39;20px&#39;,
+                    name: &#39;radio&#39;
                 },
                 columnElType: &quot;td&quot;,
                 expandable: true,
-<span id='ncTreeTable-cfg-expanderTemplate'>               /** @cfg 
-</span>                * 此属性是当数据折叠时显示的图标，默认是+号，如下：
-                *
-                * ```javascript
-                * &lt;i&gt;+&lt;/i&gt;
-                * ```
-                */
+<span id='ncTreeTable-cfg-expanderTemplate'>                /** @cfg 
+</span>                 * 此属性是当数据折叠时显示的图标，默认是+号，如下：
+                 *
+                 * ```javascript
+                 * &lt;i&gt;+&lt;/i&gt;
+                 * ```
+                 */
                 expanderTemplate: &quot;&lt;i&gt;+&lt;/i&gt;&quot;,
-<span id='ncTreeTable-cfg-reducerTemplate'>               /** @cfg 
-</span>                * 此属性是当数据展开后显示的图标，默认是-号，如下：
-                *
-                * ```javascript
-                * &lt;i&gt;-&lt;/i&gt;
-                * ```
-                */
+<span id='ncTreeTable-cfg-reducerTemplate'>                /** @cfg 
+</span>                 * 此属性是当数据展开后显示的图标，默认是-号，如下：
+                 *
+                 * ```javascript
+                 * &lt;i&gt;-&lt;/i&gt;
+                 * ```
+                 */
                 reducerTemplate: &quot;&lt;i&gt;-&lt;/i&gt;&quot;,
-<span id='ncTreeTable-cfg-indent'>               /**
-</span>                * 
-                * @cfg 
-                * 每一层的缩进距离，单位px
-                *    
-                *
-                */
+<span id='ncTreeTable-cfg-indent'>                /**
+</span>                 * 
+                 * @cfg 
+                 * 每一层的缩进距离，单位px
+                 *    
+                 *
+                 */
                 indent: 19,
                 indenterTemplate: &quot;&lt;span class=&#39;indenter&#39;&gt;&lt;/span&gt;&quot;,
                 initialState: &quot;collapsed&quot;,
@@ -529,22 +566,32 @@
                 parentIdAttr: &quot;nc-treetable-parent-id&quot;, // maps to nc-treetable-parent-id
                 stringExpand: &quot;Expand&quot;,
                 stringCollapse: &quot;Collapse&quot;,
-<span id='ncTreeTable-cfg-selected'>               /**
-</span>                * 
-                * @cfg 
-                * 当设置了withInput参数的时候，selected是一个id数组
-                * 
-                */
-                selected: []  // TODO: 是否直接判定点击执行函数好点？
+<span id='ncTreeTable-cfg-selected'>                /**
+</span>                 * 
+                 * @cfg 
+                 * 当设置了withInput参数的时候，selected是一个id数组
+                 * 
+                 */
+                selected: [], // Q: 是否直接判定点击执行函数好点？
+<span id='ncTreeTable-cfg-checked'>                /**
+</span>                 * 
+                 * @cfg 
+                 * 设置初始化选中状态，是一个id数组，如果设置withInput会设置相应的check
+                 * 如果是radio,而有多个id，只会选中第一个
+                 * 
+                 */
+                checked: []
             }, scope.ncOptions);
-
+            // Q：是否使用cache进行缓存，根据用户查看状态进行动态渲染?
             // 防止重复渲染
             scope.rendering = false;
 
             var tree = new Tree(scope.ncOptions);
             // 数据导入初始化
             tree.loadRows(scope.ncData).render();
-
+            // 设置选中状态
+            _setChecked(tree,scope.ncOptions);
+            
             var table = _initTable(element);
             // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
             _renderTable(table, tree.roots);
@@ -554,16 +601,26 @@
             scope.$watch(&#39;ncData&#39;, function(newVal, oldVal) {
                 if (newVal != oldVal &amp;&amp; !scope.rendering) {
                     scope.rendering = true;
+               
+                    tree = new Tree(scope.ncOptions);
 
-                    var tree = new Tree(scope.ncOptions);
 
-                    table.children().remove();
                     tree.loadRows(scope.ncData).render();
+           
+                    table.children().remove();
                     _renderTable(table, tree.roots);
                     scope.rendering = false;
 
                 }
-            })
+            });
+
+            // 
+            scope.$watch(&#39;ncOptions.checked&#39;, function(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    console.info(scope.ncOptions.checked);
+                    _setChecked(tree,scope.ncOptions);
+                }
+            });
 
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
@@ -575,14 +632,15 @@
             table.on(&#39;click&#39;, function(e) {
                 scope.$apply();
                 e.stopPropagation();
-            })
+            });
+
 
 
             element.append(table);
-        };
+        }
 
 
-
+        /* @ngInject */
         function controller($scope) {
             $scope.setSelect = setSelect;
 
@@ -632,9 +690,9 @@
                 ncData: &#39;=&#39;,
             },
             link: link
-        }
+        };
     }
-})(window.angular, jQuery);
+})(window.angular, window.jQuery);
 </pre>
 </body>
 </html>

@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('nc-treetable',[])
+        .module('nc-treetable', [])
         .directive('ncTreeTable', ncTreeTable);
 
     ncTreeTable.$inject = ['$compile'];
@@ -72,7 +72,7 @@
             this.toggleBtn = $('<span></span>');
             this.indenter = $(this.settings.indenterTemplate);
             this.treeCell.prepend(this.indenter);
-        };
+        }
 
         Node.prototype.toggle = function() {
 
@@ -132,7 +132,7 @@
         };
 
         Node.prototype.parentNode = function() {
-            if (this.parentId != null) {
+            if (this.parentId !== null) {
                 return this.tree[this.parentId];
             } else {
                 return null;
@@ -154,7 +154,7 @@
 
         Node.prototype._getParentId = function(node, parentIdAttr) {
             var parentId = node.attr(parentIdAttr);
-            if (parentId != null && parentId !== "") {
+            if (parentId !== null && parentId !== "") {
                 return parentId;
             }
         };
@@ -179,7 +179,7 @@
 
                 (function(tree) {
                     target.off("click").on("click", { tree: tree }, handler);
-                })(this.tree)
+                })(this.tree);
 
             }
             this.indenter[0].style.paddingLeft = "" + (this.level() * settings.indent) + "px";
@@ -250,6 +250,12 @@
             return this;
         };
 
+        Node.prototype.setChecked = function() {
+
+            this.row.find('input:first').prop('checked', true);
+            return this;
+        };
+
         function Tree(settings) {
             this.tree = {};
             this.settings = settings;
@@ -257,13 +263,13 @@
             // 缓存节点
             this.nodes = [];
             this.roots = [];
-        };
+        }
 
         // 载入每一条数据
         Tree.prototype.loadRows = function(rows) {
             var node, row, i;
 
-            if (rows != null) {
+            if (rows !== null) {
                 for (i = 0; i < rows.length; i++) {
 
                     row = this._toJQueryDOM(rows[i]);
@@ -273,7 +279,7 @@
                     this.nodes.push(node);
                     this.tree[node.id] = node;
 
-                    if (node.parentId != null && this.tree[node.parentId]) {
+                    if (node.parentId !== null && this.tree[node.parentId]) {
                         this.tree[node.parentId].addChild(node);
                     } else {
                         this.roots.push(node);
@@ -331,7 +337,8 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
-                    })
+                    });
+
                 })(row, settings);
 
                 td = $('<td></td>');
@@ -347,7 +354,7 @@
                     td = $('<td></td>');
                     td.html(row[col]);
                     tr.append(td);
-                };
+                }
             }
 
             return tr;
@@ -418,10 +425,10 @@
                 return table;
             }
 
-            var table = $('<table></table>');
+            table = $('<table></table>');
             table.addClass('table table-striped');
             table.width('100%');
-           
+
             return table;
         }
 
@@ -435,7 +442,7 @@
          * @param {Object} tree
          * 
          */
-        function _renderTable(table,tree) {
+        function _renderTable(table, tree) {
             var key;
             for (key in tree) {
                 table.append(tree[key].row);
@@ -444,68 +451,97 @@
                 }
             }
         }
+         /**
+         * @private
+         * @method _setChecked
+         * 根据checked数组，设置相应input为选中
+         * 
+         * @param {Object} tree
+         *
+         * @param {Object} options
+         * 
+         */
+        function _setChecked(tree,options) {
+            var nodes = tree.tree,
+                len = options.checked.length,
+                checked = options.checked,
+                i;
+            if (options.withInput.type == 'radio') {
+               nodes[checked[0]].setChecked();
+               return
+            }    
+            for (i = 0; i < len; i++) {
+                nodes[checked[i]].setChecked();
+            }
+        }
 
-        function link(scope, element, attrs) {
+        function link(scope, element) {
 
-           
+
             scope.ncOptions = $.extend({
                 branchAttr: "ttBranch",
-               /**
-                * 
-                * @cfg 
-                * 点击行展开  
-                *
-                */
+                /**
+                 * 
+                 * @cfg 
+                 * 点击行展开  
+                 *
+                 */
                 clickableNodeNames: true,
-                column: 1, // 扩展按钮所在列
-               /**
-                * 
-                * @cfg 
-                * 需要显示的列的key   
-                *
-                */
+                /**
+                 * 
+                 * @cfg 
+                 * 扩展按钮所在列，如果没有withInput参数，此项应该置0 
+                 *
+                 */
+                column: 1,
+                /**
+                 * 
+                 * @cfg 
+                 * 需要显示的列的key   
+                 *
+                 */
                 columNames: ['name'], // 要显示的列名，不是th
-               /** @cfg 
-                * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
-                * 
-                * ```
-                * {
-                *       type: 'radio',
-                *       width: '10%' // 第一行宽度
-                *       name: 'radio' // 可以是初始化这个模块的名称，保证值唯一，修复issue#3问题
-                * }
-                * ```
-                */
+                /** @cfg 
+                 * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
+                 * 
+                 * ```
+                 * {
+                 *       type: 'radio',
+                 *       width: '10%' // 第一行宽度
+                 *       name: 'radio' // 可以是初始化这个模块的名称，保证值唯一，修复issue#3问题
+                 * }
+                 * ```
+                 */
                 withInput: {
                     type: 'radio',
-                    width: '10%',
-                    name: 'radio' 
+                    width: '20px',
+                    name: 'radio'
                 },
                 columnElType: "td",
                 expandable: true,
-               /** @cfg 
-                * 此属性是当数据折叠时显示的图标，默认是+号，如下：
-                *
-                * ```javascript
-                * <i>+</i>
-                * ```
-                */
+                /** @cfg 
+                 * 此属性是当数据折叠时显示的图标，默认是+号，如下：
+                 *
+                 * ```javascript
+                 * <i>+</i>
+                 * ```
+                 */
                 expanderTemplate: "<i>+</i>",
-               /** @cfg 
-                * 此属性是当数据展开后显示的图标，默认是-号，如下：
-                *
-                * ```javascript
-                * <i>-</i>
-                * ```
-                */
+                /** @cfg 
+                 * 此属性是当数据展开后显示的图标，默认是-号，如下：
+                 *
+                 * ```javascript
+                 * <i>-</i>
+                 * ```
+                 */
                 reducerTemplate: "<i>-</i>",
-               /**
-                * 
-                * @cfg 
-                * 每一层的缩进距离，单位px
-                *    
-                *
-                */
+                /**
+                 * 
+                 * @cfg 
+                 * 每一层的缩进距离，单位px
+                 *    
+                 *
+                 */
                 indent: 19,
                 indenterTemplate: "<span class='indenter'></span>",
                 initialState: "collapsed",
@@ -513,21 +549,31 @@
                 parentIdAttr: "nc-treetable-parent-id", // maps to nc-treetable-parent-id
                 stringExpand: "Expand",
                 stringCollapse: "Collapse",
-               /**
-                * 
-                * @cfg 
-                * 当设置了withInput参数的时候，selected是一个id数组
-                * 
-                */
-                selected: []  // TODO: 是否直接判定点击执行函数好点？
+                /**
+                 * 
+                 * @cfg 
+                 * 当设置了withInput参数的时候，selected是一个id数组
+                 * 
+                 */
+                selected: [], // Q: 是否直接判定点击执行函数好点？
+                /**
+                 * 
+                 * @cfg 
+                 * 设置初始化选中状态，是一个id数组，如果设置withInput会设置相应的check,
+                 * 如果是radio,而且有多个id，只会选中第一个
+                 * 
+                 */
+                checked: []
             }, scope.ncOptions);
-
+            // Q：是否使用cache进行缓存，根据用户查看状态进行动态渲染?
             // 防止重复渲染
             scope.rendering = false;
 
             var tree = new Tree(scope.ncOptions);
             // 数据导入初始化
             tree.loadRows(scope.ncData).render();
+            // 设置选中状态
+            _setChecked(tree,scope.ncOptions);
 
             var table = _initTable(element);
             // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
@@ -538,16 +584,26 @@
             scope.$watch('ncData', function(newVal, oldVal) {
                 if (newVal != oldVal && !scope.rendering) {
                     scope.rendering = true;
+               
+                    tree = new Tree(scope.ncOptions);
 
-                    var tree = new Tree(scope.ncOptions);
 
-                    table.children().remove();
                     tree.loadRows(scope.ncData).render();
+           
+                    table.children().remove();
                     _renderTable(table, tree.roots);
                     scope.rendering = false;
 
                 }
-            })
+            });
+
+            // 
+            scope.$watch('ncOptions.checked', function(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    console.info(scope.ncOptions.checked);
+                    _setChecked(tree,scope.ncOptions);
+                }
+            });
 
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
@@ -559,11 +615,12 @@
             table.on('click', function(e) {
                 scope.$apply();
                 e.stopPropagation();
-            })
+            });
+
 
 
             element.append(table);
-        };
+        }
 
 
         /* @ngInject */
@@ -616,6 +673,6 @@
                 ncData: '=',
             },
             link: link
-        }
+        };
     }
-})(window.angular, jQuery);
+})(window.angular, window.jQuery);
