@@ -48,7 +48,7 @@
         }
 
         vm.changeChecked = function() {
-          vm.options.checked = [2,3,4,5];
+          vm.options.checked = [2,3,4,5,9];
         }
 
     }

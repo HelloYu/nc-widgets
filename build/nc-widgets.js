@@ -451,7 +451,7 @@
                 }
             }
         }
-         /**
+        /**
          * @private
          * @method _setChecked
          * 根据checked数组，设置相应input为选中
@@ -461,17 +461,19 @@
          * @param {Object} options
          * 
          */
-        function _setChecked(tree,options) {
+        function _setChecked(tree, options) {
             var nodes = tree.tree,
                 len = options.checked.length,
                 checked = options.checked,
                 i;
             if (options.withInput.type == 'radio') {
-               nodes[checked[0]].setChecked();
-               return
-            }    
+                nodes[checked[0]].setChecked();
+                return
+            }
             for (i = 0; i < len; i++) {
-                nodes[checked[i]].setChecked();
+                if (nodes[checked[i]] !== undefined) {
+                    nodes[checked[i]].setChecked();
+                }
             }
         }
 
@@ -573,7 +575,7 @@
             // 数据导入初始化
             tree.loadRows(scope.ncData).render();
             // 设置选中状态
-            _setChecked(tree,scope.ncOptions);
+            _setChecked(tree, scope.ncOptions);
 
             var table = _initTable(element);
             // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
@@ -584,12 +586,12 @@
             scope.$watch('ncData', function(newVal, oldVal) {
                 if (newVal != oldVal && !scope.rendering) {
                     scope.rendering = true;
-               
+
                     tree = new Tree(scope.ncOptions);
 
 
                     tree.loadRows(scope.ncData).render();
-           
+
                     table.children().remove();
                     _renderTable(table, tree.roots);
                     scope.rendering = false;
@@ -601,7 +603,7 @@
             scope.$watch('ncOptions.checked', function(newVal, oldVal) {
                 if (newVal != oldVal) {
                     console.info(scope.ncOptions.checked);
-                    _setChecked(tree,scope.ncOptions);
+                    _setChecked(tree, scope.ncOptions);
                 }
             });
 
