@@ -466,12 +466,9 @@
                 len = options.checked.length,
                 checked = options.checked,
                 i;
-            if (options.withInput.type == 'radio') {
-                nodes[checked[0]].setChecked();
-                return
-            }
+        
             for (i = 0; i < len; i++) {
-                if (nodes[checked[i]] !== undefined) {
+                if (nodes[checked[i]] !== undefined ) {
                     nodes[checked[i]].setChecked();
                 }
             }
@@ -562,7 +559,7 @@
                  * 
                  * @cfg 
                  * 设置初始化选中状态，是一个id数组，如果设置withInput会设置相应的check,
-                 * 如果是radio,而且有多个id，只会选中第一个
+                 * 如果是radio,而且有多个id，只会选中最后一个
                  * 
                  */
                 checked: []

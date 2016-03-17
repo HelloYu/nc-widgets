@@ -10,10 +10,7 @@
         var vm = this;
         vm.options = {
           checked: [1,2,5],
-          withInput: {
-            type: 'checkbox',
-            width: '10px',
-          }
+          
         };
 
         $scope.$watch('vm.options.selected', function(newVal, oldVal, scope) {
