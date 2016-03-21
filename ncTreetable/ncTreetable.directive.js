@@ -91,7 +91,7 @@
                 this.collapse();
                 // 变换按钮
                 this.toggleBtn.html(this.expander);
-               
+
 
             } else {
                 this.expand();
@@ -275,6 +275,12 @@
         Node.prototype.setChecked = function() {
 
             this.row.find('input:first').prop('checked', true);
+            return this;
+        };
+
+        Node.prototype.setUnChecke = function() {
+
+            this.row.find('input:first').prop('checked', false);
             return this;
         };
 
@@ -488,15 +494,29 @@
          */
         function _setChecked(tree, options) {
             var nodes = tree.tree,
-                len = options.checked.length,
+                len,
                 checked = options.checked,
                 i;
+
+            // 取消之前选中
+            if (tree.cacheChecked !== undefined) {
+                len = tree.cacheChecked.length;
+                for (i = 0; i < len; i++) {
+                    if (nodes[tree.cacheChecked[i]] !== undefined) {
+                        nodes[tree.cacheChecked[i]].setUnChecke();
+                    }
+                }
+            }
+
+            len = options.checked.length;
 
             for (i = 0; i < len; i++) {
                 if (nodes[checked[i]] !== undefined) {
                     nodes[checked[i]].setChecked();
                 }
             }
+            tree.cacheChecked = checked;
+
         }
 
         function link(scope, element) {
