@@ -1,4 +1,4 @@
-// version: v1.0.15
+// version: v1.0.16
 // date: 2016-3-21
 
 (function(angular, $) {
@@ -166,32 +166,37 @@
                 return parentId;
             }
         };
+        Node.prototype.setBgColorAndSelect = function(node) {
+            var noWithInput = $.isEmptyObject(this.settings.withInput);
+            // 只有没有withInput才进行设置颜色
+            if (!this.bgColor && noWithInput) {
+                this.bgColor = this.row.css('background-color');
+            }
+            // 保证只有一个row被设置颜色
+            if (noWithInput) {
+                if (this.tree.selected != undefined) {
+                    this.tree.selected.css('background', this.bgColor);
+                }
+                this.tree.selected = this.row;
+                this.row.css('background', this.settings.selectedColor);
 
+                // 先清空selected，再设置，唯一
+                this.settings.selected = [];
+                this.settings.selected.push(this.id);
+
+            }
+        }
         Node.prototype.render = function() {
             var handler,
                 settings = this.settings,
-                target,
-                noWithInput = $.isEmptyObject(this.settings.withInput);
+                target;
 
+            target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
+            
             if (settings.expandable === true && this.isBranchNode()) {
                 handler = function(e) {
-                    // 只有没有withInput才进行设置颜色
-                    if (!e.data.node.bgColor && noWithInput) {
-                        e.data.node.bgColor = e.data.node.row.css('background-color');
-                    }
-                    // 保证只有一个row被设置颜色
-                    if (noWithInput) {
-                        if (e.data.node.tree.selected != undefined) {
-                            e.data.node.tree.selected.css('background', e.data.node.bgColor);
-                        }
-                        e.data.node.tree.selected = e.data.node.row;
-                        e.data.node.row.css('background', settings.selectedColor);
 
-                        // 先清空selected，再设置，唯一
-                        e.data.node.settings.selected = [];
-                        e.data.node.settings.selected.push(e.data.node.id);
-
-                    }
+                    e.data.node.setBgColorAndSelect();
 
                     e.data.node.tree[$(this).parents("tr").attr(settings.nodeIdAttr)].toggle();
                     return e.preventDefault();
@@ -200,13 +205,22 @@
                 // 分支结点默认expander
                 this.toggleBtn.html(this.expander);
                 this.indenter.html(this.toggleBtn);
-                target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
 
                 (function(node) {
                     target.off("click").on("click", { node: node }, handler);
                 })(this);
 
+            } else {
+
+                (function(node) {
+                    target.off("click").on("click", { node: node }, function(e){
+                        e.data.node.setBgColorAndSelect();
+                    });
+                })(this);
+
             }
+
+
             this.indenter[0].style.paddingLeft = "" + (this.level() * settings.indent) + "px";
 
             return this;
@@ -371,7 +385,7 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
-                        console.info( e.data.settings.selected);
+                        console.info(e.data.settings.selected);
                     });
 
                 })(row, settings);
@@ -382,7 +396,7 @@
                 td.width(withInput.width);
                 tr.append(td);
             }
-        
+
 
             // 遍历数据根据columNames，动态生成td
             for (i = 0; i < len; i++) {
@@ -667,7 +681,7 @@
                 }
             });
 
-           
+
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
             // table.append(tr);
