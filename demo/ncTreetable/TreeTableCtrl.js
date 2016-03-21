@@ -10,11 +10,13 @@
         var vm = this;
         vm.options = {
           checked: [1,2,5],
-          withInput: { type: 'checkbox'},
+          withInput: {type:'checkbox',name:'radio',width:'20px'},
           column: 1
         };
 
-        $scope.$watch('vm.options.selected', function(newVal, oldVal, scope) {
+        $scope.$watch(function(){
+          return (vm.options.selected);
+        }, function(newVal, oldVal, scope) {
 
             console.info(newVal);
             console.info(oldVal);

@@ -1,4 +1,4 @@
-// version: v1.0.14
+// version: v1.0.15
 // date: 2016-3-21
 
 (function(angular, $) {
@@ -82,31 +82,14 @@
 
         Node.prototype.toggle = function() {
 
-            var isWithInput = $.isEmptyObject(this.settings.withInput);
 
-            // 只有没有withInput才进行设置颜色
-            if (!this.bgColor && isWithInput) {
-                this.bgColor = this.row.css('background-color');
-            }
-
-            // 在展开的时候要添加颜色，如果这个组件没有设置withInput
             if (this.expanded()) {
                 this.collapse();
                 // 变换按钮
                 this.toggleBtn.html(this.expander);
 
-
             } else {
                 this.expand();
-                // 保证只有一个row被设置颜色
-                if (isWithInput) {
-                    if (this.tree.selected != undefined) {
-                        this.tree.selected.css('background', this.bgColor);
-                    }
-                    this.tree.selected = this.row;
-                    this.row.css('background', this.settings.selectedColor);
-                }
-
                 this.toggleBtn.html(this.reducer);
             }
             return this;
@@ -187,13 +170,30 @@
         Node.prototype.render = function() {
             var handler,
                 settings = this.settings,
-                target;
-
+                target,
+                noWithInput = $.isEmptyObject(this.settings.withInput);
 
             if (settings.expandable === true && this.isBranchNode()) {
                 handler = function(e) {
+                    // 只有没有withInput才进行设置颜色
+                    if (!e.data.node.bgColor && noWithInput) {
+                        e.data.node.bgColor = e.data.node.row.css('background-color');
+                    }
+                    // 保证只有一个row被设置颜色
+                    if (noWithInput) {
+                        if (e.data.node.tree.selected != undefined) {
+                            e.data.node.tree.selected.css('background', e.data.node.bgColor);
+                        }
+                        e.data.node.tree.selected = e.data.node.row;
+                        e.data.node.row.css('background', settings.selectedColor);
 
-                    e.data.tree[$(this).parents("tr").attr(settings.nodeIdAttr)].toggle();
+                        // 先清空selected，再设置，唯一
+                        e.data.node.settings.selected = [];
+                        e.data.node.settings.selected.push(e.data.node.id);
+
+                    }
+
+                    e.data.node.tree[$(this).parents("tr").attr(settings.nodeIdAttr)].toggle();
                     return e.preventDefault();
                 };
 
@@ -202,9 +202,9 @@
                 this.indenter.html(this.toggleBtn);
                 target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
 
-                (function(tree) {
-                    target.off("click").on("click", { tree: tree }, handler);
-                })(this.tree);
+                (function(node) {
+                    target.off("click").on("click", { node: node }, handler);
+                })(this);
 
             }
             this.indenter[0].style.paddingLeft = "" + (this.level() * settings.indent) + "px";
@@ -371,15 +371,18 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
+                        console.info( e.data.settings.selected);
                     });
 
                 })(row, settings);
+
 
                 td = $('<td></td>');
                 td.append(select);
                 td.width(withInput.width);
                 tr.append(td);
             }
+        
 
             // 遍历数据根据columNames，动态生成td
             for (i = 0; i < len; i++) {
@@ -651,14 +654,20 @@
                 }
             });
 
-            // 
+            // 如设置默认同步
+            if (scope.ncOptions.checked) {
+                scope.ncOptions.selected = scope.ncOptions.checked;
+            }
+
             scope.$watch('ncOptions.checked', function(newVal, oldVal) {
                 if (newVal != oldVal) {
-                    console.info(scope.ncOptions.checked);
+                    // 有新值被设置也设置选中列表
+                    scope.ncOptions.selected = newVal;
                     _setChecked(tree, scope.ncOptions);
                 }
             });
 
+           
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
             // table.append(tr);
