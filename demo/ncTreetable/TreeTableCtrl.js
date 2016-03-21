@@ -10,7 +10,7 @@
         var vm = this;
         vm.options = {
           checked: [1,2,5],
-          withInput: {type:'radio',name:'radio',width:'20px'},
+          withInput: {type:'checkbox',name:'radio',width:'20px'},
           column: 1
         };
 

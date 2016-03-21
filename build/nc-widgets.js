@@ -176,9 +176,11 @@
             if (noWithInput) {
                 if (this.tree.selected != undefined) {
                     this.tree.selected.css('background', this.bgColor);
+                    this.tree.selected.removeClass('nc-treetable-selected');
                 }
                 this.tree.selected = this.row;
                 this.row.css('background', this.settings.selectedColor);
+                this.tree.selected.addClass('nc-treetable-selected');
 
                 // 先清空selected，再设置，唯一
                 this.settings.selected = [];
@@ -192,7 +194,7 @@
                 target;
 
             target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
-            
+
             if (settings.expandable === true && this.isBranchNode()) {
                 handler = function(e) {
 
@@ -213,7 +215,7 @@
             } else {
 
                 (function(node) {
-                    target.off("click").on("click", { node: node }, function(e){
+                    target.off("click").on("click", { node: node }, function(e) {
                         e.data.node.setBgColorAndSelect();
                     });
                 })(this);
