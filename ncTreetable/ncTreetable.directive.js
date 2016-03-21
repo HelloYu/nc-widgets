@@ -1,3 +1,6 @@
+// version: v1.0.14
+// date: 2016-3-21
+
 (function(angular, $) {
     'use strict';
 
