@@ -66,6 +66,9 @@
             this.settings = settings;
             this.parentId = this._getParentId(row, settings.parentIdAttr);
 
+            this.bgColor = null;
+
+
             this.treeCell = $(this.row.children(this.settings.columnElType)[this.settings.column]);
             this.expander = $(this.settings.expanderTemplate);
             this.reducer = $(this.settings.reducerTemplate);
@@ -76,12 +79,31 @@
 
         Node.prototype.toggle = function() {
 
+            var isWithInput = $.isEmptyObject(this.settings.withInput);
+
+            // 只有没有withInput才进行设置颜色
+            if (!this.bgColor && isWithInput) {
+                this.bgColor = this.row.css('background-color');
+            }
+
+            // 在展开的时候要添加颜色，如果这个组件没有设置withInput
             if (this.expanded()) {
                 this.collapse();
                 // 变换按钮
                 this.toggleBtn.html(this.expander);
+               
+
             } else {
                 this.expand();
+                // 保证只有一个row被设置颜色
+                if (isWithInput) {
+                    if (this.tree.selected != undefined) {
+                        this.tree.selected.css('background', this.bgColor);
+                    }
+                    this.tree.selected = this.row;
+                    this.row.css('background', this.settings.selectedColor);
+                }
+
                 this.toggleBtn.html(this.reducer);
             }
             return this;
@@ -259,6 +281,9 @@
         function Tree(settings) {
             this.tree = {};
             this.settings = settings;
+
+            // 保存当前选中的节点，并设置颜色
+            this.selected = {}
 
             // 缓存节点
             this.nodes = [];
@@ -466,9 +491,9 @@
                 len = options.checked.length,
                 checked = options.checked,
                 i;
-        
+
             for (i = 0; i < len; i++) {
-                if (nodes[checked[i]] !== undefined ) {
+                if (nodes[checked[i]] !== undefined) {
                     nodes[checked[i]].setChecked();
                 }
             }
@@ -500,7 +525,8 @@
                  *
                  */
                 columNames: ['name'], // 要显示的列名，不是th
-                /** @cfg 
+                /** 
+                 * @cfg 
                  * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
                  * 
                  * ```
@@ -516,6 +542,12 @@
                     width: '20px',
                     name: 'radio'
                 },
+                /** 
+                 * @cfg 
+                 * 当没有withInput的时候，点击行要展开并设置颜色。
+                 *
+                 */
+                selectedColor: '#2f75b2',
                 columnElType: "td",
                 expandable: true,
                 /** @cfg 
