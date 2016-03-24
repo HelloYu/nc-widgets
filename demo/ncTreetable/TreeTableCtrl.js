@@ -9,26 +9,28 @@
     function TreeTableCtrl($scope) {
         var vm = this;
         vm.options = {
-          checked: [1,2,5],
-          withInput: {type:'checkbox',name:'radio',width:'20px'},
-          column: 1
+            checked: [1, 2, 5],
+            withInput: { },
+            column: 0
         };
 
-        $scope.$watch(function(){
-          return (vm.options.selected);
+        $scope.$watch(function() {
+            return (vm.options.selected);
         }, function(newVal, oldVal, scope) {
 
             console.info(newVal);
             console.info(oldVal);
         });
         vm.data = [
-          {id:1,name:1},
-          {id:2,name:2,parentId:1},
-          {id:3,name:3,parentId:2},
-          {id:4,name:4},
-          {id:5,name:5,parentId:4},
-          {id:6,name:6,parentId:''},
+            { id: 1, name: 1 },
+            { id: 2, name: 2, parentId: 1 },
+            { id: 3, name: 3, parentId: 2 },
+            { id: 4, name: 4 },
+            { id: 5, name: 5, parentId: 4 },
+            { id: 6, name: 6, parentId: '', hasChildren: 1 },
         ];
+
+        vm.dynamicData = [];
         vm.change = function() {
             var tmp = [];
 
@@ -48,7 +50,19 @@
         }
 
         vm.changeChecked = function() {
-          vm.options.checked = [2,3,4,5,9];
+            vm.options.checked = [2, 3, 4, 5, 9];
+        }
+        vm.getDynamicData = function() {
+          console.info('s');
+           vm.dynamicData = [
+                { id: 7, name: 7 },
+                { id: 8, name: 8, parentId: 1 },
+                { id: 9, name: 9, parentId: 2 },
+                { id: 10, name: 10 },
+                { id: 11, name: 11, parentId: 4 },
+                { id: 12, name: 12, parentId: 5 },
+                { id: 13, name: 13, parentId: 6 },
+            ]
         }
 
     }

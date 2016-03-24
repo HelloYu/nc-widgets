@@ -306,7 +306,9 @@
         function Tree(settings) {
             this.tree = {};
             this.settings = settings;
-
+            // 动态数据缓存
+            this.dynamicNodesCache = [];
+            this.isDynamicData = false;
             // 保存当前选中的节点，并设置颜色
             this.selected = {}
 
@@ -327,6 +329,11 @@
                     node = new Node(row, this.tree, this.settings);
 
                     this.nodes.push(node);
+
+                    if (this.isDynamicData) {
+                        this.dynamicNodesCache.push(node);
+                    }
+
                     this.tree[node.id] = node;
 
                     if (node.parentId !== null && this.tree[node.parentId]) {
@@ -342,6 +349,8 @@
             for (i = 0; i < this.nodes.length; i++) {
                 node = this.nodes[i].updateBranchLeafClass();
             }
+
+
             return this;
         };
 
@@ -479,7 +488,7 @@
             }
 
             table = $('<table></table>');
-            table.addClass('table table-striped');
+            table.addClass('table table-striped nc-treetable');
             table.width('100%');
 
             return table;
@@ -502,6 +511,32 @@
                 if (tree[key].children.length > 0) {
                     _renderTable(table, tree[key].children);
                 }
+            }
+        }
+        /**
+         * @private
+         * @method _dynamicRenderTable
+         * 渲染动态数据
+         * 
+         * @param {Object} table
+         *
+         * @param {Object} node
+         * 
+         */
+        function _dynamicRenderTable(table, node) {
+            if (node.parentId !== undefined) {
+                var parent = node.tree[node.parentId];
+                parent.row.after(node.row);
+
+                // 如果父节点是收缩的就隐藏节点
+                if (parent.collapsed()) {
+                  node.hide();  
+                }
+
+                
+
+            } else {
+                table.append(node.row);
             }
         }
         /**
@@ -669,8 +704,26 @@
 
                 }
             });
+            scope.$watch('ncDynamicData', function(newVal, oldVal) {
+                if (newVal != oldVal && !scope.rendering) {
+                    var i;
+                    scope.rendering = true;
 
-            // 如设置默认同步
+                    tree.isDynamicData = true;
+                    tree.loadRows(scope.ncDynamicData).render();
+                    tree.isDynamicData = false;
+                    var len = tree.dynamicNodesCache.length;
+                    console.info(tree);
+
+                    for (i = 0; i < len; i++) {
+                        var node = tree.dynamicNodesCache[i];
+                        _dynamicRenderTable(table, node);
+                    }
+
+                    scope.rendering = false;
+                }
+            });
+            // 选中状态要进行同步
             if (scope.ncOptions.checked) {
                 scope.ncOptions.selected = scope.ncOptions.checked;
             }
@@ -750,6 +803,14 @@
                  * ```
                  */
                 ncData: '=',
+                /**
+                 * 
+                 * @property {Array} 
+                 * 动态数据接口，数组结构和nc-data一样，不会从新渲染树，只是将新数据加入
+                 *
+                 * 
+                 */
+                ncDynamicData: '='
             },
             link: link
         };
