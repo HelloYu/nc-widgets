@@ -68,6 +68,7 @@
             this.initialized = false;
             this.settings = settings;
             this.parentId = this._getParentId(row, settings.parentIdAttr);
+            this.childrenCount = this._getChildrenCount(row, settings.childrenCountAttr);
 
             this.bgColor = null;
 
@@ -166,6 +167,14 @@
                 return parentId;
             }
         };
+
+        Node.prototype._getChildrenCount = function(node, childrenCount) {
+            var childrenCount = node.attr(childrenCount);
+            if (childrenCount !== null && childrenCount !== "") {
+                return childrenCount;
+            }
+        };
+
         Node.prototype.setBgColorAndSelect = function(node) {
             var noWithInput = $.isEmptyObject(this.settings.withInput);
             // 只有没有withInput才进行设置颜色
@@ -213,10 +222,23 @@
                 })(this);
 
             } else {
+                console.info('has');
+                console.info(this.childrenCount);
+                if (this.childrenCount > 0) {
+                    // 分支结点默认expander
+                    this.toggleBtn.html(this.expander);
+                    this.indenter.html(this.toggleBtn);
+                }
 
                 (function(node) {
                     target.off("click").on("click", { node: node }, function(e) {
                         e.data.node.setBgColorAndSelect();
+                        // 这里的toggle只会显示自身节点，孩子节点需要动态加载进来
+                        if (node.childrenCount > 0) {
+                            e.data.node.tree[$(this).parents("tr").attr(settings.nodeIdAttr)].toggle();
+
+                        }
+
                     });
                 })(this);
 
@@ -229,7 +251,8 @@
         };
 
         Node.prototype.isBranchNode = function() {
-            if (this.children.length > 0 || this.row.data(this.settings.branchAttr) === true) {
+            if (this.childrenCount > 0 || this.children.length > 0 ||
+                this.row.data(this.settings.branchAttr) === true ) {
                 return true;
             } else {
                 return false;
@@ -366,6 +389,9 @@
             tr.attr(settings.nodeIdAttr, row.id);
             tr.attr(settings.parentIdAttr, row.parentId);
 
+            // 设置孩子数，动态加载需要使用
+            tr.attr(settings.childrenCountAttr, row.hasChildren);
+
 
             if (withInput && !$.isEmptyObject(withInput)) {
 
@@ -447,7 +473,7 @@
 
             tr.attr('ng-repeat', 'item in ncData');
             tr.attr(settings.nodeIdAttr, '{{item.id}}');
-            tr.attr(settings.parentIdAttr, '{{item.parentId}}');
+            tr.attr(settings.childrenCount, '{{item.parentId}}');
 
             // 遍历数据根据columNames，动态生成td
             for (i = 0; i < len; i++) {
@@ -528,15 +554,19 @@
                 var parent = node.tree[node.parentId];
                 parent.row.after(node.row);
 
-                // 如果父节点是收缩的就隐藏节点
-                if (parent.collapsed()) {
-                  node.hide();  
+                // 如果父节点是收缩状态的就隐藏节点
+                // 内层结点只是branch
+                if (parent.collapsed() || parent.isBranchNode()) {
+                    node.hide();
+                } 
+                // 如果父结点已经展开
+                if (parent.expanded()) {
+                    node.show();
                 }
 
-                
 
             } else {
-                table.append(node.row);
+                table.prepend(node.row);
             }
         }
         /**
@@ -654,6 +684,7 @@
                 indenterTemplate: "<span class='indenter'></span>",
                 initialState: "collapsed",
                 nodeIdAttr: "nc-treetable-id", // maps to nc-treetable-id
+                childrenCountAttr: "nc-treetable-children-count", // maps to nc-treetable-id
                 parentIdAttr: "nc-treetable-parent-id", // maps to nc-treetable-parent-id
                 stringExpand: "Expand",
                 stringCollapse: "Collapse",
@@ -712,8 +743,9 @@
                     tree.isDynamicData = true;
                     tree.loadRows(scope.ncDynamicData).render();
                     tree.isDynamicData = false;
+
                     var len = tree.dynamicNodesCache.length;
-                    console.info(tree);
+
 
                     for (i = 0; i < len; i++) {
                         var node = tree.dynamicNodesCache[i];
@@ -806,7 +838,7 @@
                 /**
                  * 
                  * @property {Array} 
-                 * 动态数据接口，数组结构和nc-data一样，不会从新渲染树，只是将新数据加入
+                 * 动态数据接口，数组结构和nc-data一样，不会从新渲染树，只是将新数据直接加入现有的树
                  *
                  * 
                  */

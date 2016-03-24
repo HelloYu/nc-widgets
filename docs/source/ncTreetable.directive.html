@@ -15,7 +15,10 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js">(function(angular, $) {
+  <pre class="prettyprint lang-js">// version: v1.0.16
+// date: 2016-3-21
+
+(function(angular, $) {
     &#39;use strict&#39;;
 
     angular
@@ -82,6 +85,10 @@
             this.initialized = false;
             this.settings = settings;
             this.parentId = this._getParentId(row, settings.parentIdAttr);
+            this.childrenCount = this._getChildrenCount(row, settings.childrenCountAttr);
+
+            this.bgColor = null;
+
 
             this.treeCell = $(this.row.children(this.settings.columnElType)[this.settings.column]);
             this.expander = $(this.settings.expanderTemplate);
@@ -93,10 +100,12 @@
 
         Node.prototype.toggle = function() {
 
+
             if (this.expanded()) {
                 this.collapse();
                 // 变换按钮
                 this.toggleBtn.html(this.expander);
+
             } else {
                 this.expand();
                 this.toggleBtn.html(this.reducer);
@@ -176,36 +185,91 @@
             }
         };
 
+        Node.prototype._getChildrenCount = function(node, childrenCount) {
+            var childrenCount = node.attr(childrenCount);
+            if (childrenCount !== null &amp;&amp; childrenCount !== &quot;&quot;) {
+                return childrenCount;
+            }
+        };
+
+        Node.prototype.setBgColorAndSelect = function(node) {
+            var noWithInput = $.isEmptyObject(this.settings.withInput);
+            // 只有没有withInput才进行设置颜色
+            if (!this.bgColor &amp;&amp; noWithInput) {
+                this.bgColor = this.row.css(&#39;background-color&#39;);
+            }
+            // 保证只有一个row被设置颜色
+            if (noWithInput) {
+                if (this.tree.selected != undefined) {
+                    this.tree.selected.css(&#39;background&#39;, this.bgColor);
+                    this.tree.selected.removeClass(&#39;nc-treetable-selected&#39;);
+                }
+                this.tree.selected = this.row;
+                this.row.css(&#39;background&#39;, this.settings.selectedColor);
+                this.tree.selected.addClass(&#39;nc-treetable-selected&#39;);
+
+                // 先清空selected，再设置，唯一
+                this.settings.selected = [];
+                this.settings.selected.push(this.id);
+
+            }
+        }
         Node.prototype.render = function() {
             var handler,
                 settings = this.settings,
                 target;
 
+            target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
 
             if (settings.expandable === true &amp;&amp; this.isBranchNode()) {
                 handler = function(e) {
 
-                    e.data.tree[$(this).parents(&quot;tr&quot;).attr(settings.nodeIdAttr)].toggle();
+                    e.data.node.setBgColorAndSelect();
+
+                    e.data.node.tree[$(this).parents(&quot;tr&quot;).attr(settings.nodeIdAttr)].toggle();
                     return e.preventDefault();
                 };
 
                 // 分支结点默认expander
                 this.toggleBtn.html(this.expander);
                 this.indenter.html(this.toggleBtn);
-                target = settings.clickableNodeNames === true ? this.treeCell : this.toggleBtn;
 
-                (function(tree) {
-                    target.off(&quot;click&quot;).on(&quot;click&quot;, { tree: tree }, handler);
-                })(this.tree);
+                (function(node) {
+                    target.off(&quot;click&quot;).on(&quot;click&quot;, { node: node }, handler);
+                })(this);
+
+            } else {
+                console.info(&#39;has&#39;);
+                console.info(this.childrenCount);
+                if (this.childrenCount &gt; 0) {
+                    // 分支结点默认expander
+                    this.toggleBtn.html(this.expander);
+                    this.indenter.html(this.toggleBtn);
+                }
+
+                (function(node) {
+                    target.off(&quot;click&quot;).on(&quot;click&quot;, { node: node }, function(e) {
+                        e.data.node.setBgColorAndSelect();
+                        // 这里的toggle只会显示自身节点，孩子节点需要动态加载进来
+                        if (node.childrenCount &gt; 0) {
+                            e.data.node.tree[$(this).parents(&quot;tr&quot;).attr(settings.nodeIdAttr)].toggle();
+
+                        }
+
+                    });
+                })(this);
 
             }
+
+
             this.indenter[0].style.paddingLeft = &quot;&quot; + (this.level() * settings.indent) + &quot;px&quot;;
 
             return this;
         };
 
         Node.prototype.isBranchNode = function() {
-            if (this.children.length &gt; 0 || this.row.data(this.settings.branchAttr) === true) {
+            if (this.childrenCount &gt; 0 || this.children.length &gt; 0 ||
+                this.row.data(this.settings.branchAttr) === true ) {
                 return true;
             } else {
                 return false;
@@ -273,9 +337,20 @@
             return this;
         };
 
+        Node.prototype.setUnChecke = function() {
+
+            this.row.find(&#39;input:first&#39;).prop(&#39;checked&#39;, false);
+            return this;
+        };
+
         function Tree(settings) {
             this.tree = {};
             this.settings = settings;
+            // 动态数据缓存
+            this.dynamicNodesCache = [];
+            this.isDynamicData = false;
+            // 保存当前选中的节点，并设置颜色
+            this.selected = {}
 
             // 缓存节点
             this.nodes = [];
@@ -294,6 +369,11 @@
                     node = new Node(row, this.tree, this.settings);
 
                     this.nodes.push(node);
+
+                    if (this.isDynamicData) {
+                        this.dynamicNodesCache.push(node);
+                    }
+
                     this.tree[node.id] = node;
 
                     if (node.parentId !== null &amp;&amp; this.tree[node.parentId]) {
@@ -309,6 +389,8 @@
             for (i = 0; i &lt; this.nodes.length; i++) {
                 node = this.nodes[i].updateBranchLeafClass();
             }
+
+
             return this;
         };
 
@@ -323,6 +405,9 @@
 
             tr.attr(settings.nodeIdAttr, row.id);
             tr.attr(settings.parentIdAttr, row.parentId);
+
+            // 设置孩子数，动态加载需要使用
+            tr.attr(settings.childrenCountAttr, row.hasChildren);
 
 
             if (withInput &amp;&amp; !$.isEmptyObject(withInput)) {
@@ -354,15 +439,18 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
+                        console.info(e.data.settings.selected);
                     });
 
                 })(row, settings);
+
 
                 td = $(&#39;&lt;td&gt;&lt;/td&gt;&#39;);
                 td.append(select);
                 td.width(withInput.width);
                 tr.append(td);
             }
+
 
             // 遍历数据根据columNames，动态生成td
             for (i = 0; i &lt; len; i++) {
@@ -402,7 +490,7 @@
 
             tr.attr(&#39;ng-repeat&#39;, &#39;item in ncData&#39;);
             tr.attr(settings.nodeIdAttr, &#39;{{item.id}}&#39;);
-            tr.attr(settings.parentIdAttr, &#39;{{item.parentId}}&#39;);
+            tr.attr(settings.childrenCount, &#39;{{item.parentId}}&#39;);
 
             // 遍历数据根据columNames，动态生成td
             for (i = 0; i &lt; len; i++) {
@@ -443,7 +531,7 @@
             }
 
             table = $(&#39;&lt;table&gt;&lt;/table&gt;&#39;);
-            table.addClass(&#39;table table-striped&#39;);
+            table.addClass(&#39;table table-striped nc-treetable&#39;);
             table.width(&#39;100%&#39;);
 
             return table;
@@ -468,7 +556,37 @@
                 }
             }
         }
-<span id='ncTreeTable-method-_setChecked'>         /**
+<span id='ncTreeTable-method-_dynamicRenderTable'>        /**
+</span>         * @private
+         * @method _dynamicRenderTable
+         * 渲染动态数据
+         * 
+         * @param {Object} table
+         *
+         * @param {Object} node
+         * 
+         */
+        function _dynamicRenderTable(table, node) {
+            if (node.parentId !== undefined) {
+                var parent = node.tree[node.parentId];
+                parent.row.after(node.row);
+
+                // 如果父节点是收缩状态的就隐藏节点
+                // 内层结点只是branch
+                if (parent.collapsed() || parent.isBranchNode()) {
+                    node.hide();
+                } 
+                // 如果父结点已经展开
+                if (parent.expanded()) {
+                    node.show();
+                }
+
+
+            } else {
+                table.prepend(node.row);
+            }
+        }
+<span id='ncTreeTable-method-_setChecked'>        /**
 </span>         * @private
          * @method _setChecked
          * 根据checked数组，设置相应input为选中
@@ -478,18 +596,31 @@
          * @param {Object} options
          * 
          */
-        function _setChecked(tree,options) {
+        function _setChecked(tree, options) {
             var nodes = tree.tree,
-                len = options.checked.length,
+                len,
                 checked = options.checked,
                 i;
-            if (options.withInput.type == &#39;radio&#39;) {
-               nodes[checked[0]].setChecked();
-               return
-            }    
-            for (i = 0; i &lt; len; i++) {
-                nodes[checked[i]].setChecked();
+
+            // 取消之前选中
+            if (tree.cacheChecked !== undefined) {
+                len = tree.cacheChecked.length;
+                for (i = 0; i &lt; len; i++) {
+                    if (nodes[tree.cacheChecked[i]] !== undefined) {
+                        nodes[tree.cacheChecked[i]].setUnChecke();
+                    }
+                }
             }
+
+            len = options.checked.length;
+
+            for (i = 0; i &lt; len; i++) {
+                if (nodes[checked[i]] !== undefined) {
+                    nodes[checked[i]].setChecked();
+                }
+            }
+            tree.cacheChecked = checked;
+
         }
 
         function link(scope, element) {
@@ -518,8 +649,9 @@
                  *
                  */
                 columNames: [&#39;name&#39;], // 要显示的列名，不是th
-<span id='ncTreeTable-cfg-withInput'>                /** @cfg 
-</span>                 * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
+<span id='ncTreeTable-cfg-withInput'>                /** 
+</span>                 * @cfg 
+                 * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
                  * 
                  * ```
                  * {
@@ -534,6 +666,12 @@
                     width: &#39;20px&#39;,
                     name: &#39;radio&#39;
                 },
+<span id='ncTreeTable-cfg-selectedColor'>                /** 
+</span>                 * @cfg 
+                 * 当没有withInput的时候，点击行要展开并设置颜色。
+                 *
+                 */
+                selectedColor: &#39;#2f75b2&#39;,
                 columnElType: &quot;td&quot;,
                 expandable: true,
 <span id='ncTreeTable-cfg-expanderTemplate'>                /** @cfg 
@@ -563,6 +701,7 @@
                 indenterTemplate: &quot;&lt;span class=&#39;indenter&#39;&gt;&lt;/span&gt;&quot;,
                 initialState: &quot;collapsed&quot;,
                 nodeIdAttr: &quot;nc-treetable-id&quot;, // maps to nc-treetable-id
+                childrenCountAttr: &quot;nc-treetable-children-count&quot;, // maps to nc-treetable-id
                 parentIdAttr: &quot;nc-treetable-parent-id&quot;, // maps to nc-treetable-parent-id
                 stringExpand: &quot;Expand&quot;,
                 stringCollapse: &quot;Collapse&quot;,
@@ -576,8 +715,8 @@
 <span id='ncTreeTable-cfg-checked'>                /**
 </span>                 * 
                  * @cfg 
-                 * 设置初始化选中状态，是一个id数组，如果设置withInput会设置相应的check
-                 * 如果是radio,而有多个id，只会选中第一个
+                 * 设置初始化选中状态，是一个id数组，如果设置withInput会设置相应的check,
+                 * 如果是radio,而且有多个id，只会选中最后一个
                  * 
                  */
                 checked: []
@@ -590,8 +729,8 @@
             // 数据导入初始化
             tree.loadRows(scope.ncData).render();
             // 设置选中状态
-            _setChecked(tree,scope.ncOptions);
-            
+            _setChecked(tree, scope.ncOptions);
+
             var table = _initTable(element);
             // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
             _renderTable(table, tree.roots);
@@ -601,26 +740,51 @@
             scope.$watch(&#39;ncData&#39;, function(newVal, oldVal) {
                 if (newVal != oldVal &amp;&amp; !scope.rendering) {
                     scope.rendering = true;
-               
+
                     tree = new Tree(scope.ncOptions);
 
 
                     tree.loadRows(scope.ncData).render();
-           
+
                     table.children().remove();
                     _renderTable(table, tree.roots);
                     scope.rendering = false;
 
                 }
             });
+            scope.$watch(&#39;ncDynamicData&#39;, function(newVal, oldVal) {
+                if (newVal != oldVal &amp;&amp; !scope.rendering) {
+                    var i;
+                    scope.rendering = true;
 
-            // 
-            scope.$watch(&#39;ncOptions.checked&#39;, function(newVal, oldVal) {
-                if (newVal != oldVal) {
-                    console.info(scope.ncOptions.checked);
-                    _setChecked(tree,scope.ncOptions);
+                    tree.isDynamicData = true;
+                    tree.loadRows(scope.ncDynamicData).render();
+                    tree.isDynamicData = false;
+
+                    var len = tree.dynamicNodesCache.length;
+
+
+                    for (i = 0; i &lt; len; i++) {
+                        var node = tree.dynamicNodesCache[i];
+                        _dynamicRenderTable(table, node);
+                    }
+
+                    scope.rendering = false;
                 }
             });
+            // 选中状态要进行同步
+            if (scope.ncOptions.checked) {
+                scope.ncOptions.selected = scope.ncOptions.checked;
+            }
+
+            scope.$watch(&#39;ncOptions.checked&#39;, function(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    // 有新值被设置也设置选中列表
+                    scope.ncOptions.selected = newVal;
+                    _setChecked(tree, scope.ncOptions);
+                }
+            });
+
 
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
@@ -688,6 +852,14 @@
                  * ```
                  */
                 ncData: &#39;=&#39;,
+<span id='ncTreeTable-property-ncDynamicData'>                /**
+</span>                 * 
+                 * @property {Array} 
+                 * 动态数据接口，数组结构和nc-data一样，不会从新渲染树，只是将新数据直接加入现有的树
+                 *
+                 * 
+                 */
+                ncDynamicData: &#39;=&#39;
             },
             link: link
         };
