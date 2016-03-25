@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('nc.Loading', [])
+        .module('nc.loading', [])
         .directive('ncLoading', ncLoading);
 
     /**

@@ -4,6 +4,6 @@
     .module('ncWidgets', [
       'ui.router',
       'nc.treetable',
-      'nc.Loading',
+      'nc.loading',
     ]);
 })();
