@@ -15,26 +15,29 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js">// version: v1.0.16
-// date: 2016-3-21
+  <pre class="prettyprint lang-js">// version: v1.0.18
+// date: 2016-3-24
 
 (function(angular, $) {
     &#39;use strict&#39;;
 
     angular
-        .module(&#39;nc-treetable&#39;, [])
-        .directive(&#39;ncTreeTable&#39;, ncTreeTable);
+        .module(&#39;nc.treetable&#39;, [])
+        .directive(&#39;ncTreetable&#39;, ncTreeTable);
 
     ncTreeTable.$inject = [&#39;$compile&#39;];
 
-<span id='ncTreeTable'>    /**
+<span id='ncTreetable'>    /**
 </span>     * 
-     * @class ncTreeTable
+     * @class ncTreetable
      * 
      * ## 使用说明
+     *
+     * 模块注入`nc.treetable`
+     * 
      * ```javascript
      * // 在html中使用标签
-     * &lt;nc-tree-table nc-options=&quot;vm.options&quot; nc-data=&quot;vm.data&quot;&gt;&lt;/nc-tree-table&gt;
+     * &lt;nc-treetable nc-options=&quot;vm.options&quot; nc-data=&quot;vm.data&quot;&gt;&lt;/nc-treetable&gt;
      *
      * // 其中option格式如下：
      * var options = {
@@ -71,7 +74,12 @@
      *    });
      * }
      * ```    
-     *     
+     * ## 使用场景
+     * 随着nc-treetable慢慢变大，也变的更加复杂，有些功能是通过几个参数组合而成，简单介绍一些组合。
+     * ### 无选择框
+     * 无选择框就是将`withInput`对象置空`{}`, 再将`column`设置成`0`，这样就是一棵单纯的树表，可以通过`selectedColor`设置选中背景颜色。
+     * ### 动态数据
+     * 有时候数据是动态加载进来的，所以提供一个数据接口，用来完成动态加载，在元素上是`nc-dynamic-data`，数据格式和nc-data一样。
      * 
      */
     /* @ngInject */
@@ -239,8 +247,8 @@
                 })(this);
 
             } else {
-                console.info(&#39;has&#39;);
-                console.info(this.childrenCount);
+               
+            
                 if (this.childrenCount &gt; 0) {
                     // 分支结点默认expander
                     this.toggleBtn.html(this.expander);
@@ -514,7 +522,7 @@
             }
             return this;
         };
-<span id='ncTreeTable-method-_initTable'>        /**
+<span id='ncTreetable-method-_initTable'>        /**
 </span>         * @private
          * @method _initTable
          * 初始化一个table元素，如果已经有这个元素移除所有结点返回   
@@ -537,7 +545,7 @@
             return table;
         }
 
-<span id='ncTreeTable-method-_renderTable'>        /**
+<span id='ncTreetable-method-_renderTable'>        /**
 </span>         * @private
          * @method _renderTable
          * 根据tree.roots中的关系，正确渲染table，
@@ -556,7 +564,7 @@
                 }
             }
         }
-<span id='ncTreeTable-method-_dynamicRenderTable'>        /**
+<span id='ncTreetable-method-_dynamicRenderTable'>        /**
 </span>         * @private
          * @method _dynamicRenderTable
          * 渲染动态数据
@@ -586,7 +594,7 @@
                 table.prepend(node.row);
             }
         }
-<span id='ncTreeTable-method-_setChecked'>        /**
+<span id='ncTreetable-method-_setChecked'>        /**
 </span>         * @private
          * @method _setChecked
          * 根据checked数组，设置相应input为选中
@@ -628,28 +636,28 @@
 
             scope.ncOptions = $.extend({
                 branchAttr: &quot;ttBranch&quot;,
-<span id='ncTreeTable-cfg-clickableNodeNames'>                /**
+<span id='ncTreetable-cfg-clickableNodeNames'>                /**
 </span>                 * 
                  * @cfg 
                  * 点击行展开  
                  *
                  */
                 clickableNodeNames: true,
-<span id='ncTreeTable-cfg-column'>                /**
+<span id='ncTreetable-cfg-column'>                /**
 </span>                 * 
                  * @cfg 
                  * 扩展按钮所在列，如果没有withInput参数，此项应该置0 
                  *
                  */
                 column: 1,
-<span id='ncTreeTable-cfg-columNames'>                /**
+<span id='ncTreetable-cfg-columNames'>                /**
 </span>                 * 
                  * @cfg 
                  * 需要显示的列的key   
                  *
                  */
                 columNames: [&#39;name&#39;], // 要显示的列名，不是th
-<span id='ncTreeTable-cfg-withInput'>                /** 
+<span id='ncTreetable-cfg-withInput'>                /** 
 </span>                 * @cfg 
                  * Treetable暂时支持checkbox和radio两种input，全只能在第一列，选中后会将id放到selected数组中。设置格式如下：
                  * 
@@ -666,7 +674,7 @@
                     width: &#39;20px&#39;,
                     name: &#39;radio&#39;
                 },
-<span id='ncTreeTable-cfg-selectedColor'>                /** 
+<span id='ncTreetable-cfg-selectedColor'>                /** 
 </span>                 * @cfg 
                  * 当没有withInput的时候，点击行要展开并设置颜色。
                  *
@@ -674,7 +682,7 @@
                 selectedColor: &#39;#2f75b2&#39;,
                 columnElType: &quot;td&quot;,
                 expandable: true,
-<span id='ncTreeTable-cfg-expanderTemplate'>                /** @cfg 
+<span id='ncTreetable-cfg-expanderTemplate'>                /** @cfg 
 </span>                 * 此属性是当数据折叠时显示的图标，默认是+号，如下：
                  *
                  * ```javascript
@@ -682,7 +690,7 @@
                  * ```
                  */
                 expanderTemplate: &quot;&lt;i&gt;+&lt;/i&gt;&quot;,
-<span id='ncTreeTable-cfg-reducerTemplate'>                /** @cfg 
+<span id='ncTreetable-cfg-reducerTemplate'>                /** @cfg 
 </span>                 * 此属性是当数据展开后显示的图标，默认是-号，如下：
                  *
                  * ```javascript
@@ -690,7 +698,7 @@
                  * ```
                  */
                 reducerTemplate: &quot;&lt;i&gt;-&lt;/i&gt;&quot;,
-<span id='ncTreeTable-cfg-indent'>                /**
+<span id='ncTreetable-cfg-indent'>                /**
 </span>                 * 
                  * @cfg 
                  * 每一层的缩进距离，单位px
@@ -705,14 +713,14 @@
                 parentIdAttr: &quot;nc-treetable-parent-id&quot;, // maps to nc-treetable-parent-id
                 stringExpand: &quot;Expand&quot;,
                 stringCollapse: &quot;Collapse&quot;,
-<span id='ncTreeTable-cfg-selected'>                /**
+<span id='ncTreetable-cfg-selected'>                /**
 </span>                 * 
                  * @cfg 
                  * 当设置了withInput参数的时候，selected是一个id数组
                  * 
                  */
                 selected: [], // Q: 是否直接判定点击执行函数好点？
-<span id='ncTreeTable-cfg-checked'>                /**
+<span id='ncTreetable-cfg-checked'>                /**
 </span>                 * 
                  * @cfg 
                  * 设置初始化选中状态，是一个id数组，如果设置withInput会设置相应的check,
@@ -772,7 +780,7 @@
                     scope.rendering = false;
                 }
             });
-            // 选中状态要进行同步
+            // 选中状态同步
             if (scope.ncOptions.checked) {
                 scope.ncOptions.selected = scope.ncOptions.checked;
             }
@@ -830,14 +838,14 @@
             restrict: &#39;EA&#39;,
             controller: controller,
             scope: {
-<span id='ncTreeTable-property-ncOptions'>                /**
+<span id='ncTreetable-property-ncOptions'>                /**
 </span>                 * 
                  * @property {Object} 
                  * 配置参数查看config   
                  * 
                  */
                 ncOptions: &#39;=&#39;,
-<span id='ncTreeTable-property-ncData'>                /**
+<span id='ncTreetable-property-ncData'>                /**
 </span>                 * 
                  * @property {Array} 
                  * 数据对象数组，对象格式如下：
@@ -852,7 +860,7 @@
                  * ```
                  */
                 ncData: &#39;=&#39;,
-<span id='ncTreeTable-property-ncDynamicData'>                /**
+<span id='ncTreetable-property-ncDynamicData'>                /**
 </span>                 * 
                  * @property {Array} 
                  * 动态数据接口，数组结构和nc-data一样，不会从新渲染树，只是将新数据直接加入现有的树

@@ -1,6 +1,9 @@
 {
     "--title": "福建新开普前端组件API文档",
     "--warnings": ["-link", "-nodoc"],
-    "--": ["ncTreeTable/"],
+    "--": [
+        "widgets/ncLoading/ncLoading.directive.js",
+        "widgets/ncTreetable/ncTreetable.directive.js"
+    ],
     "--output": "docs"
 }

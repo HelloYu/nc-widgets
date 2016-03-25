@@ -1,23 +1,26 @@
-// version: v1.0.16
-// date: 2016-3-21
+// version: v1.0.19
+// date: 2016-3-25
 
 (function(angular, $) {
     'use strict';
 
     angular
-        .module('nc-treetable', [])
-        .directive('ncTreeTable', ncTreeTable);
+        .module('nc.treetable', [])
+        .directive('ncTreetable', ncTreeTable);
 
     ncTreeTable.$inject = ['$compile'];
 
     /**
      * 
-     * @class ncTreeTable
+     * @class ncTreetable
      * 
      * ## 使用说明
+     *
+     * 模块注入`nc.treetable`
+     * 
      * ```javascript
      * // 在html中使用标签
-     * <nc-tree-table nc-options="vm.options" nc-data="vm.data"></nc-tree-table>
+     * <nc-treetable nc-options="vm.options" nc-data="vm.data"></nc-treetable>
      *
      * // 其中option格式如下：
      * var options = {
@@ -54,7 +57,12 @@
      *    });
      * }
      * ```    
-     *     
+     * ## 使用场景
+     * 随着nc-treetable慢慢变大，也变的更加复杂，有些功能是通过几个参数组合而成，简单介绍一些组合。
+     * ### 无选择框
+     * 无选择框就是将`withInput`对象置空`{}`, 再将`column`设置成`0`，这样就是一棵单纯的树表，可以通过`selectedColor`设置选中背景颜色。
+     * ### 动态数据
+     * 有时候数据是动态加载进来的，所以提供一个数据接口，用来完成动态加载，在元素上是`nc-dynamic-data`，数据格式和nc-data一样。
      * 
      */
     /* @ngInject */
@@ -222,8 +230,8 @@
                 })(this);
 
             } else {
-                console.info('has');
-                console.info(this.childrenCount);
+               
+            
                 if (this.childrenCount > 0) {
                     // 分支结点默认expander
                     this.toggleBtn.html(this.expander);
@@ -755,7 +763,7 @@
                     scope.rendering = false;
                 }
             });
-            // 选中状态要进行同步
+            // 选中状态同步
             if (scope.ncOptions.checked) {
                 scope.ncOptions.selected = scope.ncOptions.checked;
             }

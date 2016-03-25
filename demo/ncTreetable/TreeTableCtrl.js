@@ -13,7 +13,7 @@
             withInput: { },
             column: 0
         };
-
+       
         $scope.$watch(function() {
             return (vm.options.selected);
         }, function(newVal, oldVal, scope) {
@@ -53,7 +53,7 @@
             vm.options.checked = [2, 3, 4, 5, 9];
         }
         vm.getDynamicData = function() {
-          console.info('s');
+       
            vm.dynamicData = [
                 { id: 7, name: 7 },
                 { id: 8, name: 8, parentId: 1 },

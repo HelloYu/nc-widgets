@@ -24,6 +24,14 @@
                         templateUrl: 'demo/ncTreetable/index.html'
                     }
                 }
+            })
+            .state('app.loading', {
+                url: '/loading',
+                views: {
+                    'content': {
+                        templateUrl: 'demo/ncLoading/index.html'
+                    }
+                }
             });
 
         $urlRouterProvider.otherwise('/treetable');

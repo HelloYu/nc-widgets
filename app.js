@@ -3,6 +3,7 @@
   angular
     .module('ncWidgets', [
       'ui.router',
-      'nc-treetable'
+      'nc.treetable',
+      'nc.Loading',
     ]);
 })();
