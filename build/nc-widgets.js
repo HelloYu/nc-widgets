@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('nc.Loading', [])
+        .module('nc.loading', [])
         .directive('ncLoading', ncLoading);
 
     /**
@@ -103,8 +103,8 @@
 
 })(window.angular);
 
-// version: v1.0.18
-// date: 2016-3-24
+// version: v1.0.19
+// date: 2016-3-25
 
 (function(angular, $) {
     'use strict';
@@ -117,10 +117,12 @@
 
     /**
      * 
-     * @class ncTreeTable
+     * @class ncTreetable
      * 
      * ## 使用说明
+     *
      * 模块注入`nc.treetable`
+     * 
      * ```javascript
      * // 在html中使用标签
      * <nc-treetable nc-options="vm.options" nc-data="vm.data"></nc-treetable>
