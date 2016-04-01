@@ -6,7 +6,7 @@ var browserSync = require('browser-sync');
 var cssmin = require('gulp-cssmin');
 
 var source = {
-    js: ['widgets/**/*.js'],
+    js: ['version.js','widgets/**/*.js'],
     css: ['widgets/**/*.css']
 }
 

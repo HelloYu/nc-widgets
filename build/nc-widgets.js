@@ -1,3 +1,5 @@
+// version: v1.0.22
+// date: 2016-4-1
 (function(angular) {
     'use strict';
 
@@ -103,9 +105,6 @@
 
 })(window.angular);
 
-// version: v1.0.19
-// date: 2016-3-25
-
 (function(angular, $) {
     'use strict';
 
@@ -125,7 +124,7 @@
      * 
      * ```javascript
      * // 在html中使用标签
-     * <nc-treetable nc-options="vm.options" nc-data="vm.data"></nc-treetable>
+     * <table nc-treetable nc-options="vm.options" nc-data="vm.data"></table>
      *
      * // 其中option格式如下：
      * var options = {
@@ -610,28 +609,28 @@
             }
             return this;
         };
-        /**
-         * @private
-         * @method _initTable
-         * 初始化一个table元素，如果已经有这个元素移除所有结点返回   
-         * 
-         * @param {Object} element
-         * 指令所touch的元素
-         */
-        function _initTable(element) {
-            var table = element.children('table');
-            // 如果已经有table直接返回
-            if (!!table.length) {
-                table.children().remove();
-                return table;
-            }
+        // /**
+        //  * @private
+        //  * @method _initTable
+        //  * 初始化一个table元素，如果已经有这个元素移除所有结点返回   
+        //  * 
+        //  * @param {Object} element
+        //  * 指令所touch的元素
+        //  */
+        // function _initTable(element) {
+        //     var table = element.children('table');
+        //     // 如果已经有table直接返回
+        //     if (!!table.length) {
+        //         table.children().remove();
+        //         return table;
+        //     }
 
-            table = $('<table></table>');
-            table.addClass('table table-striped nc-treetable');
-            table.width('100%');
+        //     table = $('<table></table>');
+        //     table.addClass('table table-striped nc-treetable');
+        //     table.width('100%');
 
-            return table;
-        }
+        //     return table;
+        // }
 
         /**
          * @private
@@ -827,7 +826,8 @@
             // 设置选中状态
             _setChecked(tree, scope.ncOptions);
 
-            var table = _initTable(element);
+            var table = element;
+            table.addClass('nc-treetable');
             // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
             _renderTable(table, tree.roots);
 
