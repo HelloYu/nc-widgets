@@ -1,4 +1,4 @@
-// version: v1.0.22
+// version: v1.0.23
 // date: 2016-4-1
 (function(angular) {
     'use strict';
@@ -827,6 +827,7 @@
             _setChecked(tree, scope.ncOptions);
 
             var table = element;
+
             table.addClass('nc-treetable');
             // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
             _renderTable(table, tree.roots);
@@ -894,9 +895,6 @@
                 e.stopPropagation();
             });
 
-
-
-            element.append(table);
         }
 
 
