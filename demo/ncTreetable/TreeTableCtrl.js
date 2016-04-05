@@ -9,9 +9,9 @@
     function TreeTableCtrl($scope) {
         var vm = this;
         vm.options = {
-            checked: [1, 2, 5],
-            withInput: { },
-            column: 0
+            checked: [2],
+            withInput: { type:'checkbox',width:'10%',name:'radio' },
+            column: 1
         };
        
         $scope.$watch(function() {
@@ -50,7 +50,7 @@
         }
 
         vm.changeChecked = function() {
-            vm.options.checked = [2, 3, 4, 5, 9];
+            vm.options.checked = [2];
         }
         vm.getDynamicData = function() {
        

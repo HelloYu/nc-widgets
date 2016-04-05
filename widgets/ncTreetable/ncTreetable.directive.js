@@ -91,12 +91,11 @@
 
             if (this.expanded()) {
                 this.collapse();
-                // 变换按钮
-                this.toggleBtn.html(this.expander);
+
 
             } else {
                 this.expand();
-                this.toggleBtn.html(this.reducer);
+
             }
             return this;
         };
@@ -160,6 +159,7 @@
             if (settings.expandable === true && settings.initialState === "collapsed") {
                 this.collapse();
             } else {
+                console.info('expand');
                 this.expand();
             }
 
@@ -227,8 +227,8 @@
                 })(this);
 
             } else {
-               
-            
+
+
                 if (this.childrenCount > 0) {
                     // 分支结点默认expander
                     this.toggleBtn.html(this.expander);
@@ -257,7 +257,7 @@
 
         Node.prototype.isBranchNode = function() {
             if (this.childrenCount > 0 || this.children.length > 0 ||
-                this.row.data(this.settings.branchAttr) === true ) {
+                this.row.data(this.settings.branchAttr) === true) {
                 return true;
             } else {
                 return false;
@@ -294,7 +294,8 @@
             if (this.collapsed()) {
                 return this;
             }
-
+            // 变换按钮
+            this.toggleBtn.html(this.expander);
             this.row.removeClass("expanded").addClass("collapsed");
 
             this._hideChildren();
@@ -307,10 +308,13 @@
                 return this;
             }
 
+            this.toggleBtn.html(this.reducer);
+
             this.row.removeClass("collapsed").addClass("expanded");
 
-
+            console.info(this);
             if ($(this.row).is(":visible")) {
+
                 this._showChildren();
             }
 
@@ -563,7 +567,7 @@
                 // 内层结点只是branch
                 if (parent.collapsed() || parent.isBranchNode()) {
                     node.hide();
-                } 
+                }
                 // 如果父结点已经展开
                 if (parent.expanded()) {
                     node.show();
@@ -588,7 +592,10 @@
             var nodes = tree.tree,
                 len,
                 checked = options.checked,
-                i;
+                i,
+                parent,
+                parents = [],
+                node;
 
             // 取消之前选中
             if (tree.cacheChecked !== undefined) {
@@ -603,8 +610,22 @@
             len = options.checked.length;
 
             for (i = 0; i < len; i++) {
-                if (nodes[checked[i]] !== undefined) {
-                    nodes[checked[i]].setChecked();
+                node = nodes[checked[i]];
+                if ( node !== undefined) {
+
+                    node.setChecked().setBgColorAndSelect();
+                    // 如果在中间的节点，本身有孩子结点，也需要将自己展开，这时候自己本身相当于父结点
+                    parent = node;
+                    // 只能从最外层向内展开，将所有parent从内到外缓存
+                    // 再从外到内展开
+                    while (parent) {
+                        parents.unshift(parent);
+                        parent = parent.parentNode();
+                    }
+
+                    parents.forEach(function(item, index, array) {
+                        item.expand();
+                    });
                 }
             }
             tree.cacheChecked = checked;
@@ -716,8 +737,6 @@
             var tree = new Tree(scope.ncOptions);
             // 数据导入初始化
             tree.loadRows(scope.ncData).render();
-            // 设置选中状态
-            _setChecked(tree, scope.ncOptions);
 
             var table = element;
 
@@ -744,20 +763,17 @@
             });
             scope.$watch('ncDynamicData', function(newVal, oldVal) {
                 if (newVal != oldVal && !scope.rendering) {
-                    var i;
                     scope.rendering = true;
 
                     tree.isDynamicData = true;
                     tree.loadRows(scope.ncDynamicData).render();
                     tree.isDynamicData = false;
 
-                    var len = tree.dynamicNodesCache.length;
 
-
-                    for (i = 0; i < len; i++) {
-                        var node = tree.dynamicNodesCache[i];
-                        _dynamicRenderTable(table, node);
-                    }
+                    tree.dynamicNodesCache.forEach(function(node){
+                         _dynamicRenderTable(table, node);
+                    });
+    
 
                     scope.rendering = false;
                 }
@@ -774,8 +790,8 @@
                     _setChecked(tree, scope.ncOptions);
                 }
             });
-
-
+            // 设置选中状态
+            _setChecked(tree, scope.ncOptions);
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
             // table.append(tr);
