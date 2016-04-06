@@ -5,5 +5,6 @@
       'ui.router',
       'nc.treetable',
       'nc.loading',
+      'nc.auto-height',
     ]);
 })();

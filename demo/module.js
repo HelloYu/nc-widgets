@@ -32,6 +32,13 @@
                         templateUrl: 'demo/ncLoading/index.html'
                     }
                 }
+            }).state('app.auto_height', {
+                url: '/auto_height',
+                views: {
+                    'content': {
+                        templateUrl: 'demo/ncAutoHeight/index.html'
+                    }
+                }
             });
 
         $urlRouterProvider.otherwise('/treetable');
