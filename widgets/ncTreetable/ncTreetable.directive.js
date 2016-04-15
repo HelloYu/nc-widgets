@@ -312,11 +312,11 @@
 
             this.row.removeClass("collapsed").addClass("expanded");
 
-            console.info(this);
-            if ($(this.row).is(":visible")) {
+            // 项目中组件
+            // if ($(this.row).is(":visible")) {
 
                 this._showChildren();
-            }
+            // }
 
             this.expander.attr("title", this.settings.stringCollapse);
 
@@ -611,7 +611,7 @@
 
             for (i = 0; i < len; i++) {
                 node = nodes[checked[i]];
-                if ( node !== undefined) {
+                if (node !== undefined) {
 
                     node.setChecked().setBgColorAndSelect();
                     // 如果在中间的节点，本身有孩子结点，也需要将自己展开，这时候自己本身相当于父结点
@@ -730,50 +730,45 @@
                  */
                 checked: []
             }, scope.ncOptions);
-            // Q：是否使用cache进行缓存，根据用户查看状态进行动态渲染?
+          
             // 防止重复渲染
             scope.rendering = false;
 
             var tree = new Tree(scope.ncOptions);
-            // 数据导入初始化
-            tree.loadRows(scope.ncData).render();
 
             var table = element;
 
             table.addClass('nc-treetable');
-            // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
-            _renderTable(table, tree.roots);
+
 
             // 监控数据是否发生变化，如果有改变重新渲染，如果使用repeat会更快。
             // TODO: 销毁操作
             scope.$watch('ncData', function(newVal, oldVal) {
-                if (newVal != oldVal && !scope.rendering) {
+                if (newVal != undefined && newVal != null && newVal.length && !scope.rendering) {
                     scope.rendering = true;
-
-                    tree = new Tree(scope.ncOptions);
-
 
                     tree.loadRows(scope.ncData).render();
 
                     table.children().remove();
+                    // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
                     _renderTable(table, tree.roots);
                     scope.rendering = false;
 
                 }
             });
+            // 数据一致性交给实用者来判断，这里只要数据有效就沉浸
             scope.$watch('ncDynamicData', function(newVal, oldVal) {
-                if (newVal != oldVal && !scope.rendering) {
+                if (newVal != undefined && newVal != null && newVal.length && !scope.rendering) {
                     scope.rendering = true;
 
                     tree.isDynamicData = true;
                     tree.loadRows(scope.ncDynamicData).render();
                     tree.isDynamicData = false;
 
-
-                    tree.dynamicNodesCache.forEach(function(node){
-                         _dynamicRenderTable(table, node);
+                    tree.dynamicNodesCache.forEach(function(node) {
+                        _dynamicRenderTable(table, node);
                     });
-    
+
 
                     scope.rendering = false;
                 }
