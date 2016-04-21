@@ -28,8 +28,6 @@
 
             link: link,
             restrict: 'A',
-            transclude: true,
-            template: '<div style="position:relative;"><div ng-transclude></div><div class="nc-loading"></div></div>',
             scope: {
                 /**
                  * 设置Loading状态，true显示，false隐藏
@@ -65,19 +63,20 @@
                  *    
                  *
                  */
-                bgColor: 'rgba(216, 215, 213, .85)'
+                bgColor: 'rgba(0, 0, 0, .2)'
             }, scope.ncLoadingOptions);
 
-            var loading = element.find('.nc-loading');
 
-            loading.css('background-color', options.bgColor);
-            
+            var loading = $('<div></div>');
             loading.append(loadingTemplates[options.template]);
+            loading.addClass('nc-loading');
+            loading.css('background-color', options.bgColor);
+            element.css('position', 'relative');
+            element.append(loading);
 
             scope.$watch('ncLoading', function(newVal, oldVal) {
                 if (newVal != undefined) {
                     if (newVal) {
-                        console.info(newVal);
                         loading.show();
                     } else {
                         loading.hide();
