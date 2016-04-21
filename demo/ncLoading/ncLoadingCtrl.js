@@ -11,7 +11,7 @@
      
 
         for (var i = 1; i <= 10; i++) {
-            vm['status' + i] = false;
+            vm['status' + i] = true;
             vm['options' + i] = {
                 template: i
             };

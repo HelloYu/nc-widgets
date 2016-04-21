@@ -71,11 +71,11 @@
             var loading = element.find('.nc-loading');
 
             loading.css('background-color', options.bgColor);
-            console.info(options.template);
+            
             loading.append(loadingTemplates[options.template]);
 
             scope.$watch('ncLoading', function(newVal, oldVal) {
-                if (newVal != oldVal) {
+                if (newVal != undefined) {
                     if (newVal) {
                         console.info(newVal);
                         loading.show();

@@ -431,7 +431,7 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
-                        console.info(e.data.settings.selected);
+                       
                     });
 
                 })(row, settings);
