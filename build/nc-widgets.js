@@ -1,37 +1,5 @@
-// version: v1.0.28
-// date: 2016-4-21
-(function(window, document, $, angular) {
-  'use strict';
-
-  angular
-    .module('nc.auto-height',[])
-    .directive('ncAutoHeight', ncAutoHeight);
-
-  ncAutoHeight.$inject = [];
-
-  /* @ngInject */
-  function ncAutoHeight() {
-
- 
-    var ncAutoHeight = {
-      compile: compile,
-      restrict: 'A',
-    
-    };
-    return ncAutoHeight;
-
-    function compile( element, attrs) {
-       
-        var height = attrs.ncAutoHeight ? attrs.ncAutoHeight : 150;
-        var winHeight = $(window).height();
-        height = Math.ceil(winHeight - height);
-       
-        element.height(height);
-    }
-  }
-
-
-})(window, document, jQuery, angular);
+// version: v1.0.29
+// date: 2016-4-22
 (function(angular) {
     'use strict';
 
@@ -53,10 +21,10 @@
      *  
      * 
      */
-    ncLoading.$inject = [];
+    ncLoading.$inject = ['$templateRequest'];
 
     /* @ngInject */
-    function ncLoading() {
+    function ncLoading($templateRequest) {
 
         var ncLoading = {
 
@@ -91,20 +59,23 @@
                  *
                  */
                 template: 9,
-                /**
-                 * 
-                 * @cfg 设置遮罩的背景颜色
-                 *    
-                 *
-                 */
-                bgColor: 'rgba(0, 0, 0, .2)'
+
             }, scope.ncLoadingOptions);
 
 
             var loading = $('<div></div>');
-            loading.append(loadingTemplates[options.template]);
+            
+            // 这样的方式不太好。
+            if (options.templateUrl) {
+                $templateRequest(options.templateUrl).then(function(html) {
+                    loading.append(html);
+                })
+            } else {
+                loading.append(loadingTemplates[options.template]);
+            }
+
             loading.addClass('nc-loading');
-            loading.css('background-color', options.bgColor);
+
             element.css('position', 'relative');
             element.append(loading);
 
@@ -122,12 +93,12 @@
     }
 
     var loadingTemplates = {
-        1: ' <div class="nc-loading-type nc-loading-type-1 "> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div></div>',
-        2: ' <div class="nc-loading-type nc-loading-type-2 "> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div></div>',
-        3: ' <div class="nc-loading-type nc-loading-type-3 "> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div>  <div class="nc-loading-line"></div></div>',
-        4: ' <div class="nc-loading-type nc-loading-type-4 "> <div class="nc-loading-ring-1"></div></div>',
-        5: ' <div class="nc-loading-type nc-loading-type-5 "> <div class="nc-loading-ring-2"><div class="nc-loading-ball-holder"><div class="nc-loading-ball"></div></div></div>',
-        6: ' <div class="nc-loading-type nc-loading-type-6 "><div class="nc-loading-letter-holder"><div class="nc-loading-delay-1 nc-loading-letter">L</div><div class="nc-loading-delay-2 nc-loading-letter">o</div><div class="nc-loading-delay-3 nc-loading-letter">a</div><div class="nc-loading-delay-4 nc-loading-letter">d</div><div class="nc-loading-delay-5 nc-loading-letter">i</div><div class="nc-loading-delay-6 nc-loading-letter">n</div><div class="nc-loading-delay-7 nc-loading-letter">g</div><div class="nc-loading-delay-8 nc-loading-letter">.</div><div class="nc-loading-delay-9 nc-loading-letter">.</div><div class="nc-loading-delay-10 nc-loading-letter">.</div></div>',
+        1: '<div class="nc-loading-type nc-loading-type-1 "> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div></div>',
+        2: '<div class="nc-loading-type nc-loading-type-2 "> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div></div>',
+        3: '<div class="nc-loading-type nc-loading-type-3 "> <div class="nc-loading-line"></div> <div class="nc-loading-line"></div>  <div class="nc-loading-line"></div></div>',
+        4: '<div class="nc-loading-type nc-loading-type-4 "> <div class="nc-loading-ring-1"></div></div>',
+        5: '<div class="nc-loading-type nc-loading-type-5 "> <div class="nc-loading-ring-2"><div class="nc-loading-ball-holder"><div class="nc-loading-ball"></div></div></div>',
+        6: '<div class="nc-loading-type nc-loading-type-6 "><div class="nc-loading-letter-holder"><div class="nc-loading-delay-1 nc-loading-letter">L</div><div class="nc-loading-delay-2 nc-loading-letter">o</div><div class="nc-loading-delay-3 nc-loading-letter">a</div><div class="nc-loading-delay-4 nc-loading-letter">d</div><div class="nc-loading-delay-5 nc-loading-letter">i</div><div class="nc-loading-delay-6 nc-loading-letter">n</div><div class="nc-loading-delay-7 nc-loading-letter">g</div><div class="nc-loading-delay-8 nc-loading-letter">.</div><div class="nc-loading-delay-9 nc-loading-letter">.</div><div class="nc-loading-delay-10 nc-loading-letter">.</div></div>',
         7: '<div class="nc-loading-type nc-loading-type-7"><div class="nc-loading-square-holder"><div class="nc-loading-square"></div></div></div>',
         8: '<div class="nc-loading-type nc-loading-type-8"><div class="nc-loading-line"></div></div>',
         9: '<div class="nc-loading-type nc-loading-type-9"> <div class="nc-loading-spinner"><div class="nc-loading-bubble-1"></div><div class="nc-loading-bubble-2"></div></div></div>',
@@ -136,6 +107,38 @@
 
 })(window.angular);
 
+(function(window, document, $, angular) {
+  'use strict';
+
+  angular
+    .module('nc.auto-height',[])
+    .directive('ncAutoHeight', ncAutoHeight);
+
+  ncAutoHeight.$inject = [];
+
+  /* @ngInject */
+  function ncAutoHeight() {
+
+ 
+    var ncAutoHeight = {
+      compile: compile,
+      restrict: 'A',
+    
+    };
+    return ncAutoHeight;
+
+    function compile( element, attrs) {
+       
+        var height = attrs.ncAutoHeight ? attrs.ncAutoHeight : 150;
+        var winHeight = $(window).height();
+        height = Math.ceil(winHeight - height);
+       
+        element.height(height);
+    }
+  }
+
+
+})(window, document, jQuery, angular);
 (function(angular, $) {
     'use strict';
 
