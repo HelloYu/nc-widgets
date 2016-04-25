@@ -1,5 +1,37 @@
-// version: v1.0.29
-// date: 2016-4-22
+// version: v1.0.30
+// date: 2016-4-25
+(function(window, document, $, angular) {
+  'use strict';
+
+  angular
+    .module('nc.auto-height',[])
+    .directive('ncAutoHeight', ncAutoHeight);
+
+  ncAutoHeight.$inject = [];
+
+  /* @ngInject */
+  function ncAutoHeight() {
+
+ 
+    var ncAutoHeight = {
+      compile: compile,
+      restrict: 'A',
+    
+    };
+    return ncAutoHeight;
+
+    function compile( element, attrs) {
+       
+        var height = attrs.ncAutoHeight ? attrs.ncAutoHeight : 150;
+        var winHeight = $(window).height();
+        height = Math.ceil(winHeight - height);
+       
+        element.height(height);
+    }
+  }
+
+
+})(window, document, jQuery, angular);
 (function(angular) {
     'use strict';
 
@@ -107,38 +139,6 @@
 
 })(window.angular);
 
-(function(window, document, $, angular) {
-  'use strict';
-
-  angular
-    .module('nc.auto-height',[])
-    .directive('ncAutoHeight', ncAutoHeight);
-
-  ncAutoHeight.$inject = [];
-
-  /* @ngInject */
-  function ncAutoHeight() {
-
- 
-    var ncAutoHeight = {
-      compile: compile,
-      restrict: 'A',
-    
-    };
-    return ncAutoHeight;
-
-    function compile( element, attrs) {
-       
-        var height = attrs.ncAutoHeight ? attrs.ncAutoHeight : 150;
-        var winHeight = $(window).height();
-        height = Math.ceil(winHeight - height);
-       
-        element.height(height);
-    }
-  }
-
-
-})(window, document, jQuery, angular);
 (function(angular, $) {
     'use strict';
 
@@ -456,7 +456,7 @@
             // 项目中组件
             // if ($(this.row).is(":visible")) {
 
-                this._showChildren();
+            this._showChildren();
             // }
 
             this.expander.attr("title", this.settings.stringCollapse);
@@ -572,7 +572,7 @@
                         } else {
                             e.data.settings.selected.push(id);
                         }
-                       
+
                     });
 
                 })(row, settings);
@@ -871,11 +871,11 @@
                  */
                 checked: []
             }, scope.ncOptions);
-          
+
             // 防止重复渲染
             scope.rendering = false;
 
-            var tree = new Tree(scope.ncOptions);
+            var tree;
 
             var table = element;
 
@@ -887,14 +887,15 @@
             scope.$watch('ncData', function(newVal, oldVal) {
                 if (newVal != undefined && newVal != null && newVal.length && !scope.rendering) {
                     scope.rendering = true;
-
+                    tree = new Tree(scope.ncOptions)
                     tree.loadRows(scope.ncData).render();
 
                     table.children().remove();
                     // 进行重新排序并完成渲染表格，数据可能是无序的，必须保证有序渲染。
                     _renderTable(table, tree.roots);
                     scope.rendering = false;
-
+                    // 设置选中状态
+                    _setChecked(tree, scope.ncOptions);
                 }
             });
             // 数据一致性交给实用者来判断，这里只要数据有效就沉浸
@@ -926,8 +927,7 @@
                     _setChecked(tree, scope.ncOptions);
                 }
             });
-            // 设置选中状态
-            _setChecked(tree, scope.ncOptions);
+
             // angular方法暂时无法渲染结点，还没找到原因
             // var tr = tree._toAngularDOM(scope.ncOptions);
             // table.append(tr);
