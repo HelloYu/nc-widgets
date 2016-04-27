@@ -84,7 +84,7 @@
             this.toggleBtn = $('<span style="float:right"></span>');
             this.indenter = $(this.settings.indenterTemplate);
             this.treeCell.prepend(this.indenter);
-            this.treeCell.append(this.toggleBtn);
+
         }
 
         Node.prototype.toggle = function() {
@@ -222,7 +222,7 @@
                 // 分支结点默认expander
                 this.toggleBtn.html(this.expander);
                 // this.indenter.html(this.toggleBtn);
-
+                this.treeCell.append(this.toggleBtn);
                 (function(node) {
                     target.off("click").on("click", { node: node }, handler);
                 })(this);
@@ -234,6 +234,7 @@
                     // 分支结点默认expander
                     this.toggleBtn.html(this.expander);
                     // this.indenter.html(this.toggleBtn);
+                    this.treeCell.append(this.toggleBtn);
                 }
 
                 (function(node) {
@@ -691,7 +692,7 @@
                  * <i>+</i>
                  * ```
                  */
-                expanderTemplate: '<i class="fa fa-chevron-down fa-fw"></i>',
+                expanderTemplate: '<i >+</i>',
                 /** @cfg 
                  * 此属性是当数据展开后显示的图标，默认是-号，如下：
                  *
@@ -699,7 +700,7 @@
                  * <i>-</i>
                  * ```
                  */
-                reducerTemplate: '<i class="fa fa-chevron-up fa-fw"></i>',
+                reducerTemplate: '<i >-</i>',
                 /**
                  * 
                  * @cfg 
@@ -714,7 +715,7 @@
                  *    
                  *
                  */
-                unit:'em',
+                unit: 'em',
                 indenterTemplate: "<span class='indenter'></span>",
                 initialState: "collapsed",
                 nodeIdAttr: "nc-treetable-id", // maps to nc-treetable-id

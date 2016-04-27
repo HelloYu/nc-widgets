@@ -22,7 +22,7 @@
             console.info(oldVal);
         });
         vm.data = [
-            { id: 1, name: 1 },
+            { id: 1, name: '这是很长的测试数据没有什么实际意义哈哈' },
             { id: 2, name: 2, parentId: 1 },
             { id: 3, name: 3, parentId: 2 },
             { id: 4, name: 4 },
