@@ -81,9 +81,10 @@
             this.treeCell = $(this.row.children(this.settings.columnElType)[this.settings.column]);
             this.expander = $(this.settings.expanderTemplate);
             this.reducer = $(this.settings.reducerTemplate);
-            this.toggleBtn = $('<span></span>');
+            this.toggleBtn = $('<span style="float:right"></span>');
             this.indenter = $(this.settings.indenterTemplate);
             this.treeCell.prepend(this.indenter);
+            this.treeCell.append(this.toggleBtn);
         }
 
         Node.prototype.toggle = function() {
@@ -220,7 +221,7 @@
 
                 // 分支结点默认expander
                 this.toggleBtn.html(this.expander);
-                this.indenter.html(this.toggleBtn);
+                // this.indenter.html(this.toggleBtn);
 
                 (function(node) {
                     target.off("click").on("click", { node: node }, handler);
@@ -232,7 +233,7 @@
                 if (this.childrenCount > 0) {
                     // 分支结点默认expander
                     this.toggleBtn.html(this.expander);
-                    this.indenter.html(this.toggleBtn);
+                    // this.indenter.html(this.toggleBtn);
                 }
 
                 (function(node) {
@@ -250,7 +251,7 @@
             }
 
 
-            this.indenter[0].style.paddingLeft = "" + (this.level() * settings.indent) + "px";
+            this.indenter[0].style.paddingLeft = "" + (this.level() * settings.indent) + settings.unit;
 
             return this;
         };
@@ -672,7 +673,7 @@
                  */
                 withInput: {
                     type: 'radio',
-                    width: '20px',
+                    width: '1em',
                     name: 'radio'
                 },
                 /** 
@@ -690,7 +691,7 @@
                  * <i>+</i>
                  * ```
                  */
-                expanderTemplate: "<i>+</i>",
+                expanderTemplate: '<i class="fa fa-chevron-down fa-fw"></i>',
                 /** @cfg 
                  * 此属性是当数据展开后显示的图标，默认是-号，如下：
                  *
@@ -698,15 +699,22 @@
                  * <i>-</i>
                  * ```
                  */
-                reducerTemplate: "<i>-</i>",
+                reducerTemplate: '<i class="fa fa-chevron-up fa-fw"></i>',
                 /**
                  * 
                  * @cfg 
-                 * 每一层的缩进距离，单位px
+                 * 每一层的缩进距离
+                 *
+                 */
+                indent: 2.4,
+                /**
+                 * 
+                 * @cfg 
+                 * 缩进单位
                  *    
                  *
                  */
-                indent: 19,
+                unit:'em',
                 indenterTemplate: "<span class='indenter'></span>",
                 initialState: "collapsed",
                 nodeIdAttr: "nc-treetable-id", // maps to nc-treetable-id
