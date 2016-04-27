@@ -451,6 +451,7 @@
                 col = settings.columNames[i];
                 if (row[col]) {
                     td = $('<td></td>');
+                    td.attr('title',row[col]);
                     td.html(row[col]);
                     tr.append(td);
                 }
@@ -707,7 +708,7 @@
                  * 每一层的缩进距离
                  *
                  */
-                indent: 2.4,
+                indent: 1,
                 /**
                  * 
                  * @cfg 
