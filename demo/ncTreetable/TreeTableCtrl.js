@@ -9,25 +9,19 @@
     function TreeTableCtrl($scope) {
         var vm = this;
         vm.options = {
-            checked: [2],
-            withInput: { type:'checkbox',width:'10%',name:'radio' },
-            column: 1
+           
+            withInput: { },
+            column: 0
         };
        
-        $scope.$watch(function() {
-            return (vm.options.selected);
-        }, function(newVal, oldVal, scope) {
-
-            console.info(newVal);
-            console.info(oldVal);
-        });
+     
         vm.data = [
-            { id: 1, name: '这是很长的测试数据没有什么实际意义哈哈' },
-            { id: 2, name: 2, parentId: 1 },
+            { id: 1, name: '这是很长的测试数据没有什么实际意义哈哈', hasChildren: 1},
+            { id: 2, name: 2, parentId: 1, hasChildren: 1 },
             { id: 3, name: 3, parentId: 2 },
-            { id: 4, name: 4 },
+            { id: 4, name: 4 ,hasChildren: 1},
             { id: 5, name: 5, parentId: 4 },
-            { id: 6, name: 6, parentId: '', hasChildren: 1 },
+            { id: 6, name: 6, parentId: '' },
         ];
 
         vm.dynamicData = [];
@@ -48,6 +42,17 @@
 
             vm.data = tmp;
         }
+        $scope.$watch(function(){
+            return (vm.options.checked);
+        },function(newVal,oldVal){
+            debugger;
+        },true);
+
+        $scope.$watchCollection(function(){
+            return (vm.options.expanded);
+        },function(newVal,oldVal){
+            debugger;
+        });
 
         vm.changeChecked = function() {
             vm.options.checked = [2];

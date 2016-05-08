@@ -214,8 +214,14 @@
                 handler = function(e) {
 
                     e.data.node.setBgColorAndSelect();
+                    
 
                     e.data.node.tree[$(this).parents("tr").attr(settings.nodeIdAttr)].toggle();
+                    // 只有展开状态才进保存ID
+                    if (e.data.node.expanded()) {
+                        e.data.node.settings.expanded = e.data.node.id;
+                    }
+
                     return e.preventDefault();
                 };
 
@@ -228,7 +234,6 @@
                 })(this);
 
             } else {
-
 
                 if (this.childrenCount > 0) {
                     // 分支结点默认expander
@@ -250,6 +255,8 @@
                 })(this);
 
             }
+
+
 
 
             this.indenter[0].style.paddingLeft = "" + (this.level() * settings.indent) + settings.unit;
@@ -451,7 +458,7 @@
                 col = settings.columNames[i];
                 if (row[col]) {
                     td = $('<td></td>');
-                    td.attr('title',row[col]);
+                    td.attr('title', row[col]);
                     td.html(row[col]);
                     tr.append(td);
                 }
@@ -738,7 +745,14 @@
                  * 如果是radio,而且有多个id，只会选中最后一个
                  * 
                  */
-                checked: []
+                checked: [],
+                 /**
+                 * 
+                 * @cfg 
+                 * 可展开的分支，在展开的时候设置这个参数为当前展开的Id
+                 * 
+                 */
+                expanded: ''
             }, scope.ncOptions);
 
             // 防止重复渲染
