@@ -10,8 +10,13 @@
         var vm = this;
         vm.options = {
            
-            withInput: { },
-            column: 0
+            withInput: {
+                type: 'checkbox',
+                width: '1em',
+
+            },
+            column: 1,
+            allowAutoExpand:false
         };
        
      

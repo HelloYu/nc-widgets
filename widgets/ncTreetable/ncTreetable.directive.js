@@ -214,7 +214,7 @@
                 handler = function(e) {
 
                     e.data.node.setBgColorAndSelect();
-                    
+
 
                     e.data.node.tree[$(this).parents("tr").attr(settings.nodeIdAttr)].toggle();
                     // 只有展开状态才进保存ID
@@ -607,6 +607,7 @@
                 parents = [],
                 node;
 
+
             // 取消之前选中
             if (tree.cacheChecked !== undefined) {
                 len = tree.cacheChecked.length;
@@ -624,18 +625,23 @@
                 if (node !== undefined) {
 
                     node.setChecked().setBgColorAndSelect();
-                    // 如果在中间的节点，本身有孩子结点，也需要将自己展开，这时候自己本身相当于父结点
-                    parent = node;
-                    // 只能从最外层向内展开，将所有parent从内到外缓存
-                    // 再从外到内展开
-                    while (parent) {
-                        parents.unshift(parent);
-                        parent = parent.parentNode();
+
+                    // 允许自动展开才展开
+                    if (node.settings.allowAutoExpand) {
+                        // 如果在中间的节点，本身有孩子结点，也需要将自己展开，这时候自己本身相当于父结点
+                        parent = node;
+                        // 只能从最外层向内展开，将所有parent从内到外缓存
+                        // 再从外到内展开
+                        while (parent) {
+                            parents.unshift(parent);
+                            parent = parent.parentNode();
+                        }
+
+                        parents.forEach(function(item, index, array) {
+                            item.expand();
+                        });
                     }
 
-                    parents.forEach(function(item, index, array) {
-                        item.expand();
-                    });
                 }
             }
             tree.cacheChecked = checked;
@@ -746,13 +752,20 @@
                  * 
                  */
                 checked: [],
-                 /**
+                /**
                  * 
                  * @cfg 
                  * 可展开的分支，在展开的时候设置这个参数为当前展开的Id
                  * 
                  */
-                expanded: ''
+                expanded: '',
+                /**
+                 * 
+                 * @cfg 
+                 * 默认只要check就会自动展开，设置为false不展开
+                 * 
+                 */
+                allowAutoExpand: true,
             }, scope.ncOptions);
 
             // 防止重复渲染
